@@ -301,6 +301,9 @@ struct AudioUnitHelpers
 
     static int juceChannelIndexToAu (int juceIndex, const AudioChannelSet& channelSet)
     {
+        if (channelSet.isDiscreteLayout())
+            return juceIndex;
+
         AudioChannelLayoutTag currentLayout = ChannelSetToCALayoutTag (channelSet);
 
         int layoutIndex;

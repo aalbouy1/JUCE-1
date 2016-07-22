@@ -50,7 +50,6 @@
 #include "../utility/juce_IncludeSystemHeaders.h"
 #include "../utility/juce_IncludeModuleHeaders.h"
 #include "../../juce_core/native/juce_osx_ObjCHelpers.h"
-#include "../utility/juce_PluginBusUtilities.h"
 #include "../../juce_graphics/native/juce_mac_CoreGraphicsHelpers.h"
 
 #include "juce_AU_Shared.h"
@@ -316,8 +315,7 @@ public:
                      NSError** error)
         : JuceAudioUnitv3Base (descr, options, error),
           processorHolder (processor),
-          busUtils (**processorHolder, true, 8),
-          mapper (busUtils)
+          mapper (*processorHolder->get())
     {
         init();
     }
@@ -325,8 +323,7 @@ public:
     JuceAudioUnitv3 (AUAudioUnit* audioUnit, AudioComponentDescription, AudioComponentInstantiationOptions, NSError**)
         : JuceAudioUnitv3Base (audioUnit),
           processorHolder (new AudioProcessorHolder (createPluginFilterOfType (AudioProcessor::wrapperType_AudioUnitv3))),
-          busUtils (**processorHolder, true, 8),
-          mapper (busUtils)
+          mapper (*processorHolder->get())
     {
         init();
     }
@@ -349,21 +346,43 @@ public:
     //==============================================================================
     void init()
     {
-        busUtils.init();
+        AudioProcessor& processor = getAudioProcessor();
+        const AUAudioFrameCount maxFrames = [getAudioUnit() maximumFramesToRender];
 
-        getAudioProcessor().setPlayHead (this);
+       #ifdef JucePlugin_PreferredChannelConfigurations
+        short configs[][2] = {JucePlugin_PreferredChannelConfigurations};
+        const int numConfigs = sizeof (configs) / sizeof (short[2]);
 
-        totalInChannels  = busUtils.findTotalNumChannels (true);
-        totalOutChannels = busUtils.findTotalNumChannels (false);
+        jassert (numConfigs > 0 && (configs[0][0] > 0 || configs[0][1] > 0));
+        processor.setPlayConfigDetails (configs[0][0], configs[0][1], kDefaultSampleRate, static_cast<int> (maxFrames));
+
+        Array<AUChannelInfo> channelInfos;
+
+        for (int i = 0; i < numConfigs; ++i)
+        {
+            AUChannelInfo channelInfo;
+
+            channelInfo.inChannels  = configs[i][0];
+            channelInfo.outChannels = configs[i][1];
+
+            channelInfos.add (channelInfo);
+        }
+       #else
+        Array<AUChannelInfo> channelInfos = AudioUnitHelpers::getAUChannelInfo (processor);
+       #endif
+
+        processor.setPlayHead (this);
+
+        totalInChannels  = processor.getTotalNumInputChannels();
+        totalOutChannels = processor.getTotalNumOutputChannels();
 
         {
             channelCapabilities = [[NSMutableArray<NSNumber*> alloc] init];
-            Array<AUChannelInfo> channelInfo = AudioUnitHelpers::getAUChannelInfo (busUtils);
 
-            for (int i = 0; i < channelInfo.size(); ++i)
+
+            for (int i = 0; i < channelInfos.size(); ++i)
             {
-                AUChannelInfo& info = channelInfo.getReference (i);
-
+                AUChannelInfo& info = channelInfos.getReference (i);
 
                 [channelCapabilities addObject: [NSNumber numberWithInteger: info.inChannels]];
                 [channelCapabilities addObject: [NSNumber numberWithInteger: info.outChannels]];
@@ -373,9 +392,6 @@ public:
         editorObserverToken = nullptr;
         internalRenderBlock = CreateObjCBlock (this, &JuceAudioUnitv3::renderCallback);
 
-        const AUAudioFrameCount maxFrames = [getAudioUnit() maximumFramesToRender];
-
-        auto& processor = getAudioProcessor();
         processor.setRateAndBufferSizeDetails (kDefaultSampleRate, static_cast<int> (maxFrames));
         processor.prepareToPlay (kDefaultSampleRate, static_cast<int> (maxFrames));
         processor.addListener (this);
@@ -511,13 +527,45 @@ public:
     //==============================================================================
     bool allocateRenderResourcesAndReturnError (NSError **outError) override
     {
+        AudioProcessor& processor = getAudioProcessor();
         const AUAudioFrameCount maxFrames = [getAudioUnit() maximumFramesToRender];
 
         if (! JuceAudioUnitv3Base::allocateRenderResourcesAndReturnError (outError))
             return false;
 
-        totalInChannels = busUtils.findTotalNumChannels (true);
-        totalOutChannels = busUtils.findTotalNumChannels (false);
+        AudioProcessor::AudioBusesLayouts layouts;
+        for (int dir = 0; dir < 2; ++dir)
+        {
+            const bool isInput = (dir == 0);
+            const int n = processor.getBusCount (isInput);
+            Array<AudioChannelSet>& channelSets = (isInput ? layouts.inputBuses : layouts.outputBuses);
+
+            AUAudioUnitBusArray* auBuses = (isInput ? [getAudioUnit() inputBusses] : [getAudioUnit() outputBusses]);
+            jassert ([auBuses count] == static_cast<NSUInteger> (n));
+
+            for (int busIdx = 0; busIdx < n; ++busIdx)
+            {
+                AudioProcessor::AudioProcessorBus* bus = processor.getBus (isInput, busIdx);
+                AVAudioFormat* format = [[auBuses objectAtIndexedSubscript:static_cast<NSUInteger> (busIdx)] format];
+
+                AudioChannelSet newLayout;
+                if (const AVAudioChannelLayout* layout = [format channelLayout])
+                    newLayout = AudioUnitHelpers::CALayoutTagToChannelSet ([layout layoutTag]);
+                else
+                    newLayout = bus->supportedLayoutWithChannels (static_cast<int> ([format channelCount]));
+
+                if (newLayout.isDisabled())
+                    return false;
+
+                channelSets.add (newLayout);
+            }
+        }
+
+        if (! processor.setAudioBusesLayouts (layouts))
+            return false;
+
+        totalInChannels  = processor.getTotalNumInputChannels();
+        totalOutChannels = processor.getTotalNumOutputChannels();
 
         allocateBusBuffer (true);
         allocateBusBuffer (false);
@@ -526,10 +574,9 @@ public:
 
         audioBuffer.prepare (totalInChannels, totalOutChannels, static_cast<int> (maxFrames));
 
-        double sampleRate = (jmax (busUtils.getBusCount (true), busUtils.getBusCount (false)) > 0 ?
+        double sampleRate = (jmax (processor.getBusCount (true), processor.getBusCount (false)) > 0 ?
                              [[[([inputBusses count] > 0 ? inputBusses : outputBusses) objectAtIndexedSubscript: 0] format] sampleRate] : 44100.0);
 
-        auto& processor = getAudioProcessor();
         processor.setRateAndBufferSizeDetails (sampleRate, static_cast<int> (maxFrames));
         processor.prepareToPlay (sampleRate, static_cast<int> (maxFrames));
 
@@ -565,28 +612,47 @@ public:
     }
 
     //==============================================================================
-    bool shouldChangeToFormat (AVAudioFormat* format, AUAudioUnitBus* bus) override
+    bool shouldChangeToFormat (AVAudioFormat* format, AUAudioUnitBus* auBus) override
     {
-        const bool isInput = ([bus busType] == AUAudioUnitBusTypeInput);
-        const int busIdx = static_cast<int> ([bus index]);
+        const bool isInput = ([auBus busType] == AUAudioUnitBusTypeInput);
+        const int busIdx = static_cast<int> ([auBus index]);
         const int newNumChannels = static_cast<int> ([format streamDescription]->mChannelsPerFrame);
 
-        AudioChannelSet newLayout;
+        AudioProcessor& processor = getAudioProcessor();
 
-        if (const AVAudioChannelLayout* layout = [format channelLayout])
-            newLayout = AudioUnitHelpers::CALayoutTagToChannelSet ([layout layoutTag]);
-        else
-            newLayout = busUtils.getDefaultLayoutForChannelNumAndBus(isInput, busIdx, newNumChannels);
+        if (AudioProcessor::AudioProcessorBus* bus = processor.getBus (isInput, busIdx))
+        {
+          #ifdef JucePlugin_PreferredChannelConfigurations
+            ignoreUnused (bus);
 
-        if (newLayout.size() != newNumChannels)
-            return false;
+            short configs[][2] = {JucePlugin_PreferredChannelConfigurations};
 
-        bool success = getAudioProcessor().setPreferredBusArrangement (isInput, busIdx, newLayout);
+            if (! AudioUnitHelpers::isLayoutSupported (processor, isInput, busIdx, newNumChannels, configs))
+                return false;
+          #else
+            if (const AVAudioChannelLayout* layout = [format channelLayout])
+            {
+                AudioChannelSet newLayout = AudioUnitHelpers::CALayoutTagToChannelSet ([layout layoutTag]);
 
-        totalInChannels  = busUtils.findTotalNumChannels (true);
-        totalOutChannels = busUtils.findTotalNumChannels (false);
+                if (newLayout.size() != newNumChannels)
+                    return false;
 
-        return success;
+                if (! bus->isLayoutSupported (newLayout))
+                    return false;
+
+
+            }
+            else
+            {
+                if (! bus->isNumberOfChannelsSupported (newNumChannels))
+                    return false;
+            }
+           #endif
+
+            return true;
+        }
+
+        return false;
     }
 
     //==============================================================================
@@ -782,14 +848,16 @@ private:
     void addAudioUnitBusses (bool isInput)
     {
         ScopedPointer<NSMutableArray<AUAudioUnitBus*> > array = [[NSMutableArray<AUAudioUnitBus*> alloc] init];
+        AudioProcessor& processor = getAudioProcessor();
+        const int n = processor.getBusCount (isInput);
 
-        for (int i = 0; i < busUtils.getBusCount (isInput); ++i)
+        for (int i = 0; i < n; ++i)
         {
             ScopedPointer<AUAudioUnitBus> audioUnitBus;
 
             {
                 ScopedPointer<AVAudioFormat> defaultFormat = [[AVAudioFormat alloc] initStandardFormatWithSampleRate: kDefaultSampleRate
-                                                                                                            channels: static_cast<AVAudioChannelCount> (busUtils.getNumChannels (isInput, i))];
+                                                                                                            channels: static_cast<AVAudioChannelCount> (processor.getChannelCountOfBus (isInput, i))];
 
                 audioUnitBus = [[AUAudioUnitBus alloc] initWithFormat: defaultFormat
                                                                 error: nullptr];
@@ -908,7 +976,7 @@ private:
         OwnedArray<BusBuffer>& busBuffers = isInput ? inBusBuffers : outBusBuffers;
         busBuffers.clear();
 
-        const int n = busUtils.getBusCount (isInput);
+        const int n = getAudioProcessor().getBusCount (isInput);
         const AUAudioFrameCount maxFrames = [getAudioUnit() maximumFramesToRender];
 
         for (int busIdx = 0; busIdx < n; ++busIdx)
@@ -950,10 +1018,11 @@ private:
                                       NSInteger outputBusNumber, AudioBufferList* outputData, const AURenderEvent *__nullable realtimeEventListHead,
                                       AURenderPullInputBlock __nullable pullInputBlock)
     {
+        auto& processor = getAudioProcessor();
         jassert (static_cast<int> (frameCount) <= getAudioProcessor().getBlockSize());
 
         // process params
-        const int numParams = getAudioProcessor().getNumParameters();
+        const int numParams = processor.getNumParameters();
         processEvents (realtimeEventListHead, numParams, static_cast<AUEventSampleTime> (timestamp->mSampleTime));
 
         if (lastTimeStamp.mSampleTime != timestamp->mSampleTime)
@@ -1017,22 +1086,16 @@ private:
                 }
 
                 // use input pointers on remaining channels
-                int channelCount = 0;
 
                 for (int busIdx = 0; chIdx < totalInChannels;)
                 {
-                    busIdx = busUtils.getBusIdxForChannelIdx (true, chIdx, channelCount, busIdx);
+                    const int channelOffset = processor.getOffsetInBusBufferForAbsoluteChannelIndex (true, chIdx, busIdx);
 
                     BusBuffer& busBuffer = *inBusBuffers[busIdx];
                     AudioBufferList* buffer = busBuffer.get();
 
-                    const bool interleaved = busBuffer.interleaved();
-                    const int numChannels = busBuffer.numChannels();
-
                     const int* inLayoutMap = mapper.get (true, busIdx);
-
-                    for (int ch = chIdx - channelCount; ch < numChannels; ++ch)
-                        audioBuffer.setBuffer (chIdx++, interleaved ? nullptr : static_cast<float*> (buffer->mBuffers[inLayoutMap[ch]].mData));
+                    audioBuffer.setBuffer (chIdx++,  busBuffer.interleaved() ? nullptr : static_cast<float*> (buffer->mBuffers[inLayoutMap[channelOffset]].mData));
                 }
             }
 
@@ -1140,7 +1203,6 @@ private:
     static const double kDefaultSampleRate;
 
     AudioProcessorHolder::Ptr processorHolder;
-    PluginBusUtilities busUtils;
 
     int totalInChannels, totalOutChannels;
 
