@@ -1659,7 +1659,7 @@ public:
         if (numIns > numInputBuses || numOuts > numOutputBuses)
             return false;
 
-        AudioProcessor::AudioBusLayouts requested = pluginInstance->getBusLayouts();
+        AudioProcessor::AudioBusesLayouts requested = pluginInstance->getAudioBusesLayouts();
 
         for (int i = 0; i < numIns; ++i)
             requested.getChannelSet (true,  i) = getChannelSetForSpeakerArrangement (inputs[i]);
@@ -1673,7 +1673,7 @@ public:
             return kResultFalse;
        #endif
 
-        return (pluginInstance->setBusLayoutsWithoutEnabling (requested) ? kResultTrue : kResultFalse);
+        return (pluginInstance->setAudioBusesLayoutsWithoutEnabling (requested) ? kResultTrue : kResultFalse);
     }
 
     tresult PLUGIN_API getBusArrangement (Vst::BusDirection dir, Steinberg::int32 index, Vst::SpeakerArrangement& arr) override
