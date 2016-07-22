@@ -126,12 +126,6 @@ public:
         const int numConfigs = sizeof (configs) / sizeof (short[2]);
 
         jassert (numConfigs > 0 && (configs[0][0] > 0 || configs[0][1] > 0));
-
-        // You are using multibus features but still using the legacy JucePlugin_PreferredChannelConfigurations
-        // definition. This does not work. Upgrade your code.
-        jassert ((! juceFilter->canAddBus (true))        && (! juceFilter->canAddBus (false))
-              &&   (juceFilter->getBusCount (true) <= 1) && (  juceFilter->getBusCount (false) <= 1));
-
         juceFilter->setPlayConfigDetails (configs[0][0], configs[0][1], 44100.0, 1024);
 
         for (int i = 0; i < numConfigs; ++i)
