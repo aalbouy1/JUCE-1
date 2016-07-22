@@ -599,6 +599,9 @@ public:
     /** Enables all buses */
     bool enableAllBuses();
 
+    /** Disables all non-main buses (aux and sidechains). */
+    bool disableNonMainBuses ();
+
     //==============================================================================
     /** Returns the position of a bus's channels within the processBlock buffer.
         This can be called in processBlock to figure out which channel of the master AudioSampleBuffer
@@ -1584,7 +1587,6 @@ private:
    #endif
 
     AudioProcessorListener* getListenerLocked (int) const noexcept;
-    bool disableNonMainBuses ();
     void updateSpeakerFormatStrings();
     bool applyBusLayouts (const AudioBusesLayouts& arr);
     void audioIOChanged (bool busNumberChanged, bool channelNumChanged);
