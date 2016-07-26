@@ -1761,6 +1761,13 @@ private:
             }
         }
 
+       #ifdef JucePlugin_PreferredChannelConfigurations
+        short configs[][2] = {JucePlugin_PreferredChannelConfigurations};
+
+        if (! AudioProcessor::containsLayout (requestedLayouts, configs))
+            return kAudioUnitErr_FormatNotSupported;
+       #endif
+
         if (! juceFilter->setAudioBusesLayouts (requestedLayouts))
             return kAudioUnitErr_FormatNotSupported;
 

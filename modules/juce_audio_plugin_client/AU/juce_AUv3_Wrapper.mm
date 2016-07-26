@@ -133,7 +133,12 @@ public:
     AUAudioUnit* getAudioUnit() noexcept                                   { return au; }
     virtual int getVirtualMIDICableCount()                                 { return 0; }
     virtual void reset()                                                   {}
-    virtual bool shouldChangeToFormat (AVAudioFormat*, AUAudioUnitBus*)    { return true; }
+    virtual bool shouldChangeToFormat (AVAudioFormat* format, AUAudioUnitBus* bus)
+    {
+        objc_super s = { getAudioUnit(), [AUAudioUnit class] };
+        return (ObjCMsgSendSuper<BOOL, AVAudioFormat*,AUAudioUnitBus* > (&s, @selector (shouldChangeToFormat:forBus:), format, bus) == YES);
+    }
+
     virtual AUAudioUnitPreset* getCurrentPreset()                          { return nullptr; }
     virtual void setCurrentPreset(AUAudioUnitPreset*)                      {}
     virtual NSTimeInterval getLatency()                                    { return 0.0; }
@@ -175,10 +180,7 @@ public:
     virtual bool allocateRenderResourcesAndReturnError (NSError **outError)
     {
         objc_super s = { getAudioUnit(), [AUAudioUnit class] };
-        if (! ObjCMsgSendSuper<BOOL, NSError**> (&s, @selector (allocateRenderResourcesAndReturnError:), outError))
-            return false;
-
-        return true;
+        return (ObjCMsgSendSuper<BOOL, NSError**> (&s, @selector (allocateRenderResourcesAndReturnError:), outError) == YES);
     }
 
     virtual void deallocateRenderResources()
@@ -270,11 +272,11 @@ private:
         static AUAudioUnitBusArray* getOutputBusses  (id self, SEL)                                 { return _this (self)->getOutputBusses(); }
         static AUParameterTree*     getParameterTree (id self, SEL)                                 { return _this (self)->getParameterTree(); }
         static AUInternalRenderBlock getInternalRenderBlock (id self, SEL)                          { return _this (self)->getInternalRenderBlock();  }
-        static BOOL allocateRenderResourcesAndReturnError (id self, SEL, NSError** error)           { return _this (self)->allocateRenderResourcesAndReturnError (error); }
+        static BOOL allocateRenderResourcesAndReturnError (id self, SEL, NSError** error)           { return _this (self)->allocateRenderResourcesAndReturnError (error) ? YES : NO; }
         static void deallocateRenderResources (id self, SEL)                                        { _this (self)->deallocateRenderResources(); }
         static void reset (id self, SEL)                                                            { _this (self)->reset(); }
         static NSInteger getVirtualMIDICableCount (id self, SEL)                                    { return _this (self)->getVirtualMIDICableCount(); }
-        static BOOL shouldChangeToFormat (id self, SEL, AVAudioFormat* format, AUAudioUnitBus* bus) { return _this (self)->shouldChangeToFormat (format, bus); }
+        static BOOL shouldChangeToFormat (id self, SEL, AVAudioFormat* format, AUAudioUnitBus* bus) { return _this (self)->shouldChangeToFormat (format, bus) ? YES : NO; }
         static NSArray<NSNumber*>* parametersForOverviewWithCount (id self, SEL, NSInteger count)   { return _this (self)->parametersForOverviewWithCount (static_cast<int> (count)); }
         static NSArray<AUAudioUnitPreset*>* getFactoryPresets (id self, SEL)                        { return _this (self)->getFactoryPresets(); }
         static AUAudioUnitPreset* getCurrentPreset (id self, SEL)                                   { return _this (self)->getCurrentPreset(); }
@@ -283,8 +285,8 @@ private:
         static void setFullState (id self, SEL, NSDictionary<NSString *, id>* state)                { return _this (self)->setFullState (state); }
         static NSTimeInterval getLatency (id self, SEL)                                             { return _this (self)->getLatency(); }
         static NSTimeInterval getTailTime (id self, SEL)                                            { return _this (self)->getTailTime(); }
-        static BOOL getCanProcessInPlace (id self, SEL)                                             { return _this (self)->getCanProcessInPlace(); }
-        static BOOL getRenderingOffline (id self, SEL)                                              { return _this (self)->getRenderingOffline(); }
+        static BOOL getCanProcessInPlace (id self, SEL)                                             { return _this (self)->getCanProcessInPlace() ? YES : NO; }
+        static BOOL getRenderingOffline (id self, SEL)                                              { return _this (self)->getRenderingOffline() ? YES : NO; }
         static void setRenderingOffline (id self, SEL, BOOL renderingOffline)                       { _this (self)->setRenderingOffline (renderingOffline); }
         static NSArray<NSNumber*>* getChannelCapabilities (id self, SEL)                            { return _this (self)->getChannelCapabilities(); }
     };
@@ -533,6 +535,9 @@ public:
         if (! JuceAudioUnitv3Base::allocateRenderResourcesAndReturnError (outError))
             return false;
 
+        if (outError != nullptr)
+            *outError = nullptr;
+
         AudioProcessor::AudioBusesLayouts layouts;
         for (int dir = 0; dir < 2; ++dir)
         {
@@ -561,8 +566,25 @@ public:
             }
         }
 
-        if (! processor.setAudioBusesLayouts (layouts))
+       #ifdef JucePlugin_PreferredChannelConfigurations
+        short configs[][2] = {JucePlugin_PreferredChannelConfigurations};
+
+        if (! AudioProcessor::containsLayout (layouts, configs))
+        {
+            if (outError != nullptr)
+                *outError = [NSError errorWithDomain:NSOSStatusErrorDomain code:kAudioUnitErr_FormatNotSupported userInfo:nullptr];
+
             return false;
+        }
+       #endif
+
+        if (! processor.setAudioBusesLayouts (layouts))
+        {
+            if (outError != nullptr)
+                *outError = [NSError errorWithDomain:NSOSStatusErrorDomain code:kAudioUnitErr_FormatNotSupported userInfo:nullptr];
+
+            return false;
+        }
 
         totalInChannels  = processor.getTotalNumInputChannels();
         totalOutChannels = processor.getTotalNumOutputChannels();
@@ -616,7 +638,7 @@ public:
     {
         const bool isInput = ([auBus busType] == AUAudioUnitBusTypeInput);
         const int busIdx = static_cast<int> ([auBus index]);
-        const int newNumChannels = static_cast<int> ([format streamDescription]->mChannelsPerFrame);
+        const int newNumChannels = static_cast<int> ([format channelCount]);
 
         AudioProcessor& processor = getAudioProcessor();
 
@@ -639,8 +661,6 @@ public:
 
                 if (! bus->isLayoutSupported (newLayout))
                     return false;
-
-
             }
             else
             {
