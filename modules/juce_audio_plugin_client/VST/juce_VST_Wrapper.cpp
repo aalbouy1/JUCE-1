@@ -294,6 +294,12 @@ public:
 
         setUniqueID ((int) (JucePlugin_VSTUniqueID));
 
+        // You must at least have some channels
+        jassert (filter->isMidiEffect() || (maxNumInChannels > 0 || maxNumOutChannels > 0));
+
+        if (filter->isMidiEffect())
+            maxNumInChannels = maxNumOutChannels = 2;
+
         setNumInputs  (maxNumInChannels);
         setNumOutputs (maxNumOutChannels);
 
@@ -387,7 +393,7 @@ public:
              || strcmp (text, "receiveVstMidiEvent") == 0
              || strcmp (text, "receiveVstMidiEvents") == 0)
         {
-           #if JucePlugin_WantsMidiInput
+           #if JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect
             return 1;
            #else
             return -1;
@@ -398,7 +404,7 @@ public:
              || strcmp (text, "sendVstMidiEvent") == 0
              || strcmp (text, "sendVstMidiEvents") == 0)
         {
-           #if JucePlugin_ProducesMidiOutput
+           #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
             return 1;
            #else
             return -1;
@@ -463,7 +469,7 @@ public:
     //==============================================================================
     VstInt32 processEvents (VstEvents* events) override
     {
-       #if JucePlugin_WantsMidiInput
+       #if JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect
         VSTMidiEventList::addEventsToMidiBuffer (events, midiEvents);
         return 1;
        #else
@@ -476,6 +482,7 @@ public:
     void internalProcessReplacing (FloatType** inputs, FloatType** outputs,
                                    VstInt32 numSamples, VstTempBuffers<FloatType>& tmpBuffers)
     {
+        const bool isMidiEffect = filter->isMidiEffect();
         if (firstProcessCallback)
         {
             firstProcessCallback = false;
@@ -501,7 +508,7 @@ public:
            #endif
         }
 
-       #if JUCE_DEBUG && ! JucePlugin_ProducesMidiOutput
+       #if JUCE_DEBUG && ! (JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect)
         const int numMidiEventsComingIn = midiEvents.getNumEvents();
        #endif
 
@@ -561,7 +568,7 @@ public:
 
                 {
                     const int numChannels = jmax (numIn, numOut);
-                    AudioBuffer<FloatType> chans (tmpBuffers.channels, numChannels, numSamples);
+                    AudioBuffer<FloatType> chans (tmpBuffers.channels, isMidiEffect ? 0 : numChannels, numSamples);
 
                     if (isBypassed)
                         filter->processBlockBypassed (chans, midiEvents);
@@ -578,7 +585,7 @@ public:
 
         if (! midiEvents.isEmpty())
         {
-           #if JucePlugin_ProducesMidiOutput
+           #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
             const int numEvents = midiEvents.getNumEvents();
 
             outgoingEvents.ensureSize (numEvents);
@@ -680,7 +687,7 @@ public:
 
             AudioEffectX::resume();
 
-           #if JucePlugin_ProducesMidiOutput
+           #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
             outgoingEvents.ensureSize (512);
            #endif
         }
@@ -907,7 +914,7 @@ public:
     bool setSpeakerArrangement (VstSpeakerArrangement* pluginInput,
                                 VstSpeakerArrangement* pluginOutput) override
     {
-        if (pluginHasSidechainsOrAuxs())
+        if (pluginHasSidechainsOrAuxs() || filter->isMidiEffect())
             return false;
 
         const int numIns  = filter->getBusCount (true);
@@ -966,7 +973,7 @@ public:
 
     bool getSpeakerArrangement (VstSpeakerArrangement** pluginInput, VstSpeakerArrangement** pluginOutput) override
     {
-        if (pluginHasSidechainsOrAuxs())
+        if (pluginHasSidechainsOrAuxs() || filter->isMidiEffect())
             return false;
 
         AudioChannelSet inputLayout  = filter->getChannelLayoutOfBus (true,  0);
@@ -1000,6 +1007,9 @@ public:
 
     bool getPinProperties (VstPinProperties& properties, bool direction, int index) const
     {
+        if (filter->isMidiEffect())
+            return false;
+
         int channelIdx, busIdx;
 
         // fill with default
