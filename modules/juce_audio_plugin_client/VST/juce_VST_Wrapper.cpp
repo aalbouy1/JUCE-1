@@ -954,7 +954,7 @@ public:
                 return false;
         }
 
-        AudioProcessor::AudioBusesLayouts layouts = filter->getAudioBusesLayouts();
+        AudioProcessor::AudioBusesLayout layouts = filter->getAudioBusesLayout();
 
         if (pluginInput  != nullptr && pluginInput-> numChannels >= 0 && numIns  > 0)
             layouts.getChannelSet (true,  0) = SpeakerMappings::vstArrangementTypeToChannelSet (*pluginInput);
@@ -968,7 +968,7 @@ public:
             return false;
        #endif
 
-        return filter->setAudioBusesLayouts (layouts);
+        return filter->setAudioBusesLayout (layouts);
     }
 
     bool getSpeakerArrangement (VstSpeakerArrangement** pluginInput, VstSpeakerArrangement** pluginOutput) override

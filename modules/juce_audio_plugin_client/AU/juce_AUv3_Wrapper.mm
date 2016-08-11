@@ -538,7 +538,7 @@ public:
         if (outError != nullptr)
             *outError = nullptr;
 
-        AudioProcessor::AudioBusesLayouts layouts;
+        AudioProcessor::AudioBusesLayout layouts;
         for (int dir = 0; dir < 2; ++dir)
         {
             const bool isInput = (dir == 0);
@@ -578,7 +578,7 @@ public:
         }
        #endif
 
-        if (! processor.setAudioBusesLayouts (layouts))
+        if (! processor.setAudioBusesLayout (layouts))
         {
             if (outError != nullptr)
                 *outError = [NSError errorWithDomain:NSOSStatusErrorDomain code:kAudioUnitErr_FormatNotSupported userInfo:nullptr];
