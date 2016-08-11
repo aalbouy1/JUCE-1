@@ -400,19 +400,9 @@ public:
         producesMidiMessages = canProduceMidiOutput();
         setRateAndBufferSizeDetails (rate, blockSize);
         setLatencySamples (0);
-
-        if (parameters.size() == 0)
-        {
-            // some plugins crash if initialiseAudioUnit() is called too soon (sigh..), so we'll
-            // only call it here if it seems like they it's one of the awkward plugins that can
-            // only create their parameters after it has been initialised.
-            if (! initialiseAudioUnit())
-                return false;
-
-            refreshParameterList();
-        }
-
+        refreshParameterList();
         createPluginCallbacks();
+
         return true;
     }
 
@@ -747,8 +737,21 @@ public:
 
             resetBuses();
 
-            jassert (! prepared);
-            initialiseAudioUnit();
+            bool ignore;
+
+            if (! syncBusLayouts (getAudioBusesLayout(), false, ignore))
+                return;
+
+            prepared = (AudioUnitInitialize (audioUnit) == noErr);
+
+            if (prepared)
+            {
+                if (! syncBusLayouts (getAudioBusesLayout(), true, ignore))
+                {
+                    prepared = false;
+                    AudioUnitUninitialize (audioUnit);
+                }
+            }
         }
     }
 
@@ -766,30 +769,6 @@ public:
         }
 
         incomingMidi.clear();
-    }
-
-    bool initialiseAudioUnit()
-    {
-        if (! prepared)
-        {
-            bool ignore;
-
-            if (! syncBusLayouts (getAudioBusesLayout(), false, ignore))
-                return false;
-
-            prepared = (AudioUnitInitialize (audioUnit) == noErr);
-
-            if (prepared)
-            {
-                if (! syncBusLayouts (getAudioBusesLayout(), true, ignore))
-                {
-                    prepared = false;
-                    AudioUnitUninitialize (audioUnit);
-                }
-            }
-        }
-
-        return prepared;
     }
 
     void resetBuses()
@@ -1133,8 +1112,6 @@ public:
 
         if (propertyList != 0)
         {
-            initialiseAudioUnit();
-
             AudioUnitSetProperty (audioUnit, kAudioUnitProperty_ClassInfo, kAudioUnitScope_Global,
                                   0, &propertyList, sizeof (propertyList));
 
@@ -1900,9 +1877,6 @@ private:
 
     bool createView (const bool createGenericViewIfNeeded)
     {
-        if (! plugin.initialiseAudioUnit())
-            return false;
-
         JUCE_IOS_MAC_VIEW* pluginView = nil;
         UInt32 dataSize = 0;
         Boolean isWritable = false;
