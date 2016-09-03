@@ -133,6 +133,7 @@
 		147E02A7F9A65F317BE4256D = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_AudioChannelSet.h"; path = "../../../../modules/juce_audio_processors/processors/juce_AudioChannelSet.h"; sourceTree = "SOURCE_ROOT"; };
 		14A87A1183D1758B09986E28 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_MouseEvent.cpp"; path = "../../../../modules/juce_gui_basics/mouse/juce_MouseEvent.cpp"; sourceTree = "SOURCE_ROOT"; };
 		14AE8BC9816304F509EC1773 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_OggVorbisAudioFormat.cpp"; path = "../../../../modules/juce_audio_formats/codecs/juce_OggVorbisAudioFormat.cpp"; sourceTree = "SOURCE_ROOT"; };
+		14C89FAA1E3A8F2B3DBB4DF2 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_VSTCommon.h"; path = "../../../../modules/juce_audio_processors/format_types/juce_VSTCommon.h"; sourceTree = "SOURCE_ROOT"; };
 		14E06A6B79437E04E334F7AB = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_MidiMessageCollector.h"; path = "../../../../modules/juce_audio_devices/midi_io/juce_MidiMessageCollector.h"; sourceTree = "SOURCE_ROOT"; };
 		14E68B91F5DD3904D9C98600 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_gui_extra.mm"; path = "../../JuceLibraryCode/juce_gui_extra.mm"; sourceTree = "SOURCE_ROOT"; };
 		14E94077B6856B9AD6AE0D45 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_audio_devices.h"; path = "../../../../modules/juce_audio_devices/juce_audio_devices.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1203,6 +1204,7 @@
 		F86E07B5B542F6F4B7F77A4F = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_AudioProcessorPlayer.h"; path = "../../../../modules/juce_audio_utils/players/juce_AudioProcessorPlayer.h"; sourceTree = "SOURCE_ROOT"; };
 		F86F912E470660B0C7047823 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_android_Threads.cpp"; path = "../../../../modules/juce_core/native/juce_android_Threads.cpp"; sourceTree = "SOURCE_ROOT"; };
 		F8700C66EB5AE3292B585E19 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_String.cpp"; path = "../../../../modules/juce_core/text/juce_String.cpp"; sourceTree = "SOURCE_ROOT"; };
+		F88D166360E180210259FBEA = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_AU_Shared.h"; path = "../../../../modules/juce_audio_processors/format_types/juce_AU_Shared.h"; sourceTree = "SOURCE_ROOT"; };
 		F8D23A339EA851D0838B8D4D = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CachedComponentImage.h"; path = "../../../../modules/juce_gui_basics/components/juce_CachedComponentImage.h"; sourceTree = "SOURCE_ROOT"; };
 		F8D4181043B6E13CF16E7E00 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = jidctflt.c; path = "../../../../modules/juce_graphics/image_formats/jpglib/jidctflt.c"; sourceTree = "SOURCE_ROOT"; };
 		F8D4B164A423E3A891708A59 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jconfig.h; path = "../../../../modules/juce_graphics/image_formats/jpglib/jconfig.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1576,12 +1578,13 @@
 					1B6A039FE3A63210FC1936D2,
 					084D91B2AD459A0FEBEFD449,
 					1B6A039FE3A63210FC1936D2, ); name = "juce_audio_formats"; sourceTree = "<group>"; };
-		0A8EC3BAE84B17F0CCFAA08E = {isa = PBXGroup; children = (
+		3ED812FC194789D9AF08E03F = {isa = PBXGroup; children = (
 					157C1BBF0329BDB102534A38,
 					7EC4BF7FFDD52F005ACDF6CC,
 					C231F5F352D49DF474C24FEF,
 					C9EBFF5064D2B5EEE2C95FE1, ); name = format; sourceTree = "<group>"; };
-		8A1776147DE1F56F2AD018F8 = {isa = PBXGroup; children = (
+		CBFDD002777F1F8DF44AC4C3 = {isa = PBXGroup; children = (
+					F88D166360E180210259FBEA,
 					4CAFE02422227FB8CDD130A5,
 					397E6AC0BA27761D41FF7E5B,
 					C2F0321856C5812A685B349D,
@@ -1590,11 +1593,12 @@
 					D99B064D47C6B0FDDBC66B02,
 					ACE3FF969AC408A50E9A6A4C,
 					B1CA1F3AE7555C4FB4CE52D2,
+					14C89FAA1E3A8F2B3DBB4DF2,
 					069AD628740BD9731986CDFC,
 					10EE0138720A51EBAD46FFCC,
 					A53F1F6AAA9F18823C239E6C,
 					C270737E2B85C6D98E145525, ); name = "format_types"; sourceTree = "<group>"; };
-		28B2A64060E5DD1193AEDD8F = {isa = PBXGroup; children = (
+		C553E92307A3FE3476A99B77 = {isa = PBXGroup; children = (
 					1AB268A2EC53E0104B612174,
 					147E02A7F9A65F317BE4256D,
 					E2696473F0CBB933DB4BE257,
@@ -1618,7 +1622,7 @@
 					56B81C77BF78FE2D460B8FFD,
 					CBE270C197A66B22EEE54D9C,
 					93387B269F26CF7363E17A32, ); name = scanning; sourceTree = "<group>"; };
-		F0B73165A2FD3FCE2464EAAF = {isa = PBXGroup; children = (
+		D5954C0A7EA3CDC20443158E = {isa = PBXGroup; children = (
 					FB5BDEC764A9719128BE27A0,
 					88B72EF2795B6178454734C1,
 					6EB11C857BABDD8CA6D2540C,
@@ -1628,11 +1632,11 @@
 					2E82C650752108DC296CBD6B,
 					C8F6BD92FD1A6C6799664B6A, ); name = utilities; sourceTree = "<group>"; };
 		0FB8D0CA8D202CE76367B337 = {isa = PBXGroup; children = (
-					0A8EC3BAE84B17F0CCFAA08E,
-					8A1776147DE1F56F2AD018F8,
-					28B2A64060E5DD1193AEDD8F,
+					3ED812FC194789D9AF08E03F,
+					CBFDD002777F1F8DF44AC4C3,
+					C553E92307A3FE3476A99B77,
 					62236C627F4DE4A894D8A09A,
-					F0B73165A2FD3FCE2464EAAF,
+					D5954C0A7EA3CDC20443158E,
 					59808039879586960196605F,
 					973D507D2DF9F9FDE7A59EB8,
 					D5C074653417ED69A2B570AC,
@@ -2717,6 +2721,7 @@
 				INFOPLIST_FILE = Info-App.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
+				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion";
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.pluginhost;
 				SDKROOT_ppc = macosx10.5; }; name = Debug; };
 		49453CC5AD9F08D2738464AC = {isa = XCBuildConfiguration; buildSettings = {
@@ -2740,6 +2745,7 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
+				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion";
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.pluginhost;
 				SDKROOT_ppc = macosx10.5; }; name = Release; };
 		8D1CA827F1EFD443BDCF198A = {isa = XCBuildConfiguration; buildSettings = {
