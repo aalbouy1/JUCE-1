@@ -768,6 +768,13 @@ public:
             properties.configurationType = SpeakerMappings::channelSetToVstArrangementType (channelSet);
             String label = bus.getName();
 
+           #ifdef JucePlugin_PreferredChannelConfigurations
+            label += String (" ") + String (channelIdx);
+           #else
+            if (channelSet.size() > 1)
+                label += String (" ") + AudioChannelSet::getAbbreviatedChannelTypeName (channelType);
+           #endif
+
             label.copyToUTF8 (properties.text, (size_t) (vstMaxParameterOrPinLabelLength + 1));
             label.copyToUTF8 (properties.shortText, (size_t) (vstMaxParameterOrPinShortLabelLength + 1));
 
