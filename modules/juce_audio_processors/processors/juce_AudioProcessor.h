@@ -634,62 +634,9 @@ public:
     //==============================================================================
     /** Returns true if the Audio processor is likely to support a given layout.
 
-        This can be called regardless if the processor is currently runni*/
-    bool checkAudioBusesLayoutSupported (const AudioBusesLayout& layouts) const;
-
-    /** Returns the best supported alternative for a layout which is potentially not
-        supported by the audio processor.
-
-        This method is useful if you require a particular layout on a subset of the
-        AudioProcessor's buses. You can use this mehtod to obtain a layout which
-        is supported by the AudioProcessor without needing to call checkAudioBusesLayoutSupported
-        on all possible combinations to figure out which one is supported by the
-        audio processor.
-
-        For example, a host which wants to modify the main input bus layout from mono
-        to stereo could use this code:
-
-        @code
-        AudioChannelLayout withStereoIn = processor.getAudioBusesLayout();
-        withStereoIn.inputBuses.getReference (0) = AudioChannelSet::stereo();
-
-        processor.setAudioBusesLayout (withStereoIn);
-        @endcode
-
-        However, the above may fail even if the audio processor supports stereo on
-        the input bus. This is the case, for example, if the audio processor requires
-        the number of channels on the main input and output bus to be the same, and
-        the audio processor had a single channel on the input and output before the
-        above code was executed. In this case, the setAudioBusesLayout method is called
-        with a stereo input but a mono output - a layout which is not supported by
-        the audio processor. To avoid this, the last line in the above code can
-        be modified in the following way:
-
-        @code
-        processor.setAudioBusesLayout (getNextBestLayout (withStereoIn));
-        @endcode
-
-        Alternatively, you can also call setChannelLayoutOfBus which will internally
-        call this method.
-
-        Note, that if the given layout is already supported by the audio processor
-        then this method will simply return the given layout without any modifications.
-
-        Implementations of audio processors may choose to override this function
-        to respond to a layout request by the host. The return value is a layout
-        which the host should use instead if the given layout is not supported.
-        If the given layout is supported then this method must return the given
-        layout without altering it.
-
-        The default implementation will simply return the given layout if
-        checkAudioBusesLayoutSupported returns true. Otherwise, it will try to match
-        input and output layouts. If this also fails then the method will
-        return the current or default layout - whichever is closer to the
-        requested layout.
-
-        @see AudioProcessorBus::setCurrentLayout, setAudioBusesLayout
+        This can be called regardless if the processor is currently running.
     */
-    virtual AudioBusesLayout getNextBestLayout (const AudioBusesLayout& layouts) const;
+    bool checkAudioBusesLayoutSupported (const AudioBusesLayout& layouts) const;
 
     //==============================================================================
     /** Returns true if the Audio processor supports double precision floating point processing.
@@ -1306,9 +1253,9 @@ public:
 
     /** This is called by the processor to specify its details before being played. You
         should call this function after having informed the processor about the channel
-        and bus layouts via setPreferredbusLayout.
+        and bus layouts via setAudioBusesLayout.
 
-        @see setPreferredbusLayout
+        @see setAudioBusesLayout
     */
     void setRateAndBufferSizeDetails (double sampleRate, int blockSize) noexcept;
 
@@ -1590,6 +1537,7 @@ private:
     void updateSpeakerFormatStrings();
     bool applyBusLayouts (const AudioBusesLayout& arr);
     void audioIOChanged (bool busNumberChanged, bool channelNumChanged);
+    AudioBusesLayout getNextBestLayout (const AudioBusesLayout& layouts) const;
 
     template <typename floatType>
     void processBypassed (AudioBuffer<floatType>&, MidiBuffer&);

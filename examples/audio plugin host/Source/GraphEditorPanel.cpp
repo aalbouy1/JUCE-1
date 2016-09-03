@@ -255,21 +255,21 @@ public:
 
     void updateConfig (const AudioChannelSet& set, bool isInput, int busIdx)
     {
-        AudioProcessor::AudioBusesLayout newLayout = currentLayout;
-        newLayout.getChannelSet (isInput, busIdx) = set;
-
-        if (currentLayout != newLayout)
+        if (currentLayout.getChannelSet (isInput, busIdx) != set)
         {
             if (AudioProcessor* p = getAudioProcessor())
             {
-                newLayout = p->getNextBestLayout (newLayout);
-                currentLayout = newLayout;
+                if (AudioProcessor::AudioProcessorBus* bus = p->getBus (isInput, busIdx))
+                {
+                    AudioProcessor::AudioBusesLayout newLayout = bus->getAudioBusesLayoutForLayoutChangeOfBus (set);
+                    currentLayout = newLayout;
 
-                if (inConfig != nullptr)
-                    inConfig->updateBusConfig (currentLayout.inputBuses);
+                    if (inConfig != nullptr)
+                        inConfig->updateBusConfig (currentLayout.inputBuses);
 
-                if (outConfig != nullptr)
-                    outConfig->updateBusConfig (currentLayout.outputBuses);
+                    if (outConfig != nullptr)
+                        outConfig->updateBusConfig (currentLayout.outputBuses);
+                }
             }
         }
     }
