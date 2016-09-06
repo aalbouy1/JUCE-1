@@ -469,6 +469,8 @@ public:
         AudioChannelSet layout, dfltLayout, lastLayout;
         bool enabledByDefault;
         int cachedChannelCount;
+
+        JUCE_DECLARE_NON_COPYABLE (Bus);
     };
 
     //==============================================================================
