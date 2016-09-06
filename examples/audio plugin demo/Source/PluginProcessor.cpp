@@ -186,9 +186,19 @@ void JuceDemoPluginAudioProcessor::initialiseSynth()
 bool JuceDemoPluginAudioProcessor::isAudioBusesLayoutSupported (const AudioBusesLayout& layouts) const
 {
     // Only mono/stereo and input/output must have same layout
-    return ((layouts.getMainInputChannelSet()  == AudioChannelSet::mono() ||
-             layouts.getMainInputChannelSet()  == AudioChannelSet::stereo()) &&
-            (layouts.getMainOutputChannelSet() == layouts.getMainInputChannelSet()));
+    const AudioChannelSet& mainInput  = layouts.getMainInputChannelSet();
+    const AudioChannelSet& mainOutput = layouts.getMainOutputChannelSet();
+
+    // input and output layout must be the same
+    if (mainInput != mainOutput) return false;
+
+    // do not allow disabling the main buses
+    if (mainInput.isDisabled()) return false;
+
+    // only allow stereo and mono
+    if (mainInput.size() > 2) return false;
+
+    return true;
 }
 
 void JuceDemoPluginAudioProcessor::prepareToPlay (double newSampleRate, int /*samplesPerBlock*/)
