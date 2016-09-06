@@ -1010,6 +1010,12 @@ namespace AAXClasses
             if (numInputBuses > 0 && p.getChannelLayoutOfBus (true, 0) != mainInput)
                 return false;
 
+           #ifdef JucePlugin_PreferredChannelConfigurations
+            short configs[][2] = {JucePlugin_PreferredChannelConfigurations};
+            if (! AudioProcessor::containsLayout (p.getAudioBusesLayout(), configs))
+                return false;
+           #endif
+
             bool foundValid = false;
             {
                 AudioProcessor::AudioBusesLayout onlyMains = p.getAudioBusesLayout();
