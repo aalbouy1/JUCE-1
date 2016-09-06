@@ -1077,8 +1077,9 @@ int AudioProcessor::AudioProcessorBus::getBusIndex() const
 void AudioProcessor::AudioProcessorBus::busDirAndIndex (bool& input, int& idx) const noexcept
 {
     idx = owner.inputBuses.indexOf (this);
+    input = (idx >= 0);
 
-    if (! (input = (idx >= 0)))
+    if (! input)
         idx = owner.outputBuses.indexOf (this);
 }
 

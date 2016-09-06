@@ -54,10 +54,10 @@ public:
           canAddColumn (canCurrentlyAddColumn),
           canRemoveColumn (canCurrentlyRemoveColumn)
     {
-        TableHeaderComponent& header = getHeader();
+        TableHeaderComponent& tableHeader = getHeader();
 
         for (int i = 0; i < 16; ++i)
-            header.addColumn (String (i + 1), i + 1, 40);
+            tableHeader.addColumn (String (i + 1), i + 1, 40);
 
         setHeaderHeight (0);
         setRowHeight (40);
@@ -233,20 +233,20 @@ public:
 private:
     void updateBusButtons()
     {
-        if (AudioProcessor* processor = owner.getAudioProcessor())
+        if (AudioProcessor* filter = owner.getAudioProcessor())
         {
             TableHeaderComponent& header = ioBuses.getHeader();
             header.removeAllColumns();
 
-            const int n = processor->getBusCount (isInput);
+            const int n = filter->getBusCount (isInput);
             for (int i = 0; i < n; ++i)
                 header.addColumn ("", i + 1, 40);
 
             header.addColumn ("+", NumberedBoxes::plusButtonColumnId,  20);
             header.addColumn ("-", NumberedBoxes::minusButtonColumnId, 20);
 
-            ioBuses.setCanAddColumn    (processor->canAddBus    (isInput));
-            ioBuses.setCanRemoveColumn (processor->canRemoveBus (isInput));
+            ioBuses.setCanAddColumn    (filter->canAddBus    (isInput));
+            ioBuses.setCanRemoveColumn (filter->canRemoveBus (isInput));
         }
 
         ioBuses.setSelected (currentBus + 1);
@@ -254,9 +254,9 @@ private:
 
     void updateBusLayout()
     {
-        if (AudioProcessor* processor = owner.getAudioProcessor())
+        if (AudioProcessor* filter = owner.getAudioProcessor())
         {
-            if (AudioProcessor::AudioProcessorBus* bus = processor->getBus (isInput, currentBus))
+            if (AudioProcessor::AudioProcessorBus* bus = filter->getBus (isInput, currentBus))
             {
                 int i;
 
@@ -295,9 +295,9 @@ private:
     {
         if (combo == &layouts)
         {
-            if (AudioProcessor* processor = owner.getAudioProcessor())
+            if (AudioProcessor* filter = owner.getAudioProcessor())
             {
-                if (AudioProcessor::AudioProcessorBus* bus = processor->getBus (isInput, currentBus))
+                if (AudioProcessor::AudioProcessorBus* bus = filter->getBus (isInput, currentBus))
                 {
                     const int selectedNumChannels = layouts.getSelectedId();
 
@@ -323,9 +323,9 @@ private:
     {
         if (btn == &enabledToggle && enabledToggle.isEnabled())
         {
-            if (AudioProcessor* processor = owner.getAudioProcessor())
+            if (AudioProcessor* filter = owner.getAudioProcessor())
             {
-                if (AudioProcessor::AudioProcessorBus* bus = processor->getBus (isInput, currentBus))
+                if (AudioProcessor::AudioProcessorBus* bus = filter->getBus (isInput, currentBus))
                 {
                     if (bus->isEnabled() != enabledToggle.getToggleState())
                     {
@@ -359,11 +359,11 @@ private:
     //==============================================================================
     void addColumn() override
     {
-        if (AudioProcessor* processor = owner.getAudioProcessor())
+        if (AudioProcessor* filter = owner.getAudioProcessor())
         {
-            if (processor->canAddBus (isInput))
+            if (filter->canAddBus (isInput))
             {
-                if (processor->addBus (isInput))
+                if (filter->addBus (isInput))
                 {
                     updateBusButtons();
                     updateBusLayout();
@@ -382,13 +382,13 @@ private:
 
     void removeColumn() override
     {
-        if (AudioProcessor* processor = owner.getAudioProcessor())
+        if (AudioProcessor* filter = owner.getAudioProcessor())
         {
-            if (processor->getBusCount (isInput) > 1 && processor->canRemoveBus (isInput))
+            if (filter->getBusCount (isInput) > 1 && filter->canRemoveBus (isInput))
             {
-                if (processor->removeBus (isInput))
+                if (filter->removeBus (isInput))
                 {
-                    currentBus = jmin (processor->getBusCount (isInput) - 1, currentBus);
+                    currentBus = jmin (filter->getBusCount (isInput) - 1, currentBus);
 
                     updateBusButtons();
                     updateBusLayout();
