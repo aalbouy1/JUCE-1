@@ -389,13 +389,13 @@ static const unsigned char temp_binary_data_4[] =
 "    if (layouts.getMainOutputChannelSet() != AudioChannelSet::mono()\r\n"
 "     && layouts.getMainOutputChannelSet() != AudioChannelSet::stereo())\r\n"
 "        return false;\r\n"
-"    \r\n"
+"\r\n"
 "    // This checks if the input layout matches the output layout\r\n"
 "   #if ! JucePlugin_IsSynth\r\n"
 "    if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())\r\n"
 "        return false;\r\n"
 "   #endif\r\n"
-"    \r\n"
+"\r\n"
 "    return true;\r\n"
 "  #endif\r\n"
 "}\r\n"
@@ -4059,7 +4059,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0xafccbd3f:  numBytes = 3203; return jucer_AudioComponentTemplate_cpp;
         case 0x27c5a93a:  numBytes = 1162; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 994; return jucer_AudioPluginEditorTemplate_h;
-        case 0x51b49ac5:  numBytes = 5495; return jucer_AudioPluginFilterTemplate_cpp;
+        case 0x51b49ac5:  numBytes = 5487; return jucer_AudioPluginFilterTemplate_cpp;
         case 0x488afa0a:  numBytes = 2269; return jucer_AudioPluginFilterTemplate_h;
         case 0xabad7041:  numBytes = 2151; return jucer_ComponentTemplate_cpp;
         case 0xfc72fe86:  numBytes = 2131; return jucer_ComponentTemplate_h;
