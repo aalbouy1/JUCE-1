@@ -132,6 +132,10 @@
           file="Source/FilterGraph.cpp"/>
     <FILE id="auGSxnlTU" name="FilterGraph.h" compile="0" resource="0"
           file="Source/FilterGraph.h"/>
+    <FILE id="cnfPX5" name="FilterIOConfiguration.cpp" compile="1" resource="0"
+          file="Source/FilterIOConfiguration.cpp"/>
+    <FILE id="ZVUq7Q" name="FilterIOConfiguration.h" compile="0" resource="0"
+          file="Source/FilterIOConfiguration.h"/>
     <FILE id="2b09bSUt" name="GraphEditorPanel.cpp" compile="1" resource="0"
           file="Source/GraphEditorPanel.cpp"/>
     <FILE id="sj8Yug8cu" name="GraphEditorPanel.h" compile="0" resource="0"

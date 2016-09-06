@@ -367,6 +367,9 @@
     <ClCompile Include="..\..\Source\FilterGraph.cpp">
       <Filter>Plugin Host</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\FilterIOConfiguration.cpp">
+      <Filter>Plugin Host</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\GraphEditorPanel.cpp">
       <Filter>Plugin Host</Filter>
     </ClCompile>
@@ -2104,6 +2107,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\FilterGraph.h">
+      <Filter>Plugin Host</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\FilterIOConfiguration.h">
       <Filter>Plugin Host</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\GraphEditorPanel.h">
