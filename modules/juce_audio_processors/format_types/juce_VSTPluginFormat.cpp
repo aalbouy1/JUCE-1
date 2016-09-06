@@ -588,7 +588,7 @@ class VSTPluginInstance     : public AudioPluginInstance,
                               private AsyncUpdater
 {
 private:
-    VSTPluginInstance (const ModuleHandle::Ptr& mh, const AudioIOProperties& ioConfig, VstEffectInterface* effect)
+    VSTPluginInstance (const ModuleHandle::Ptr& mh, const BusesProperties& ioConfig, VstEffectInterface* effect)
         : AudioPluginInstance (ioConfig),
           vstEffect (effect),
           vstModule (mh),
@@ -668,7 +668,7 @@ public:
             newEffect->dispatchFunction (newEffect, plugInOpcodeSetBlockSize,  0, jmax (32, initialBlockSize), 0, 0);
 
             newEffect->dispatchFunction (newEffect, plugInOpcodeOpen, 0, 0, 0, 0);
-            AudioIOProperties ioConfig = queryBusIO (newEffect);
+            BusesProperties ioConfig = queryBusIO (newEffect);
             newEffect->dispatchFunction (newEffect, plugInOpcodeClose, 0, 0, 0, 0);
 
             newEffect = constructEffect (newModule);
@@ -941,14 +941,14 @@ public:
     bool canAddBus (bool) const override                                       { return false; }
     bool canRemoveBus (bool) const override                                    { return false; }
 
-    bool isAudioBusesLayoutSupported (const AudioBusesLayout& layouts) const override
+    bool isBusesLayoutSupported (const BusesLayout& layouts) const override
     {
         const int numInputBuses  = getBusCount (true);
         const int numOutputBuses = getBusCount (false);
 
         // it's not possible to change layout if there are sidechains/aux buses
         if (numInputBuses > 1 || numOutputBuses > 1)
-            return (layouts == getAudioBusesLayout());
+            return (layouts == getBusesLayout());
 
         return (layouts.getNumChannels (true,  0) <= vstEffect->numInputChannels
              && layouts.getNumChannels (false, 0) <= vstEffect->numOutputChannels);
@@ -1592,9 +1592,9 @@ private:
         return effect;
     }
 
-    static AudioIOProperties queryBusIO (VstEffectInterface* effect)
+    static BusesProperties queryBusIO (VstEffectInterface* effect)
     {
-        AudioIOProperties returnValue;
+        BusesProperties returnValue;
 
         VstSpeakerConfiguration* inArr = nullptr, *outArr = nullptr;
         if (effect->dispatchFunction (effect, plugInOpcodeGetSpeakerArrangement, 0, reinterpret_cast<pointer_sized_int> (&inArr), &outArr, 0.0f) == 0)

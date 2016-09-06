@@ -31,7 +31,7 @@ public:
     //==============================================================================
     //==============================================================================
     NoiseGate()
-        : AudioProcessor (AudioIOProperties().withInput  ("Input",     AudioChannelSet::stereo())
+        : AudioProcessor (BusesProperties().withInput  ("Input",     AudioChannelSet::stereo())
                                              .withOutput ("Output",    AudioChannelSet::stereo())
                                              .withInput  ("Sidechain", AudioChannelSet::mono()))
     {
@@ -42,7 +42,7 @@ public:
     ~NoiseGate() {}
 
     //==============================================================================
-    bool isAudioBusesLayoutSupported (const AudioBusesLayout& layouts) const override
+    bool isBusesLayoutSupported (const BusesLayout& layouts) const override
     {
         // the sidechain can take any layout, the main bus needs to be the same on the input and output
         return (layouts.getMainInputChannelSet() == layouts.getMainOutputChannelSet() &&

@@ -34,8 +34,8 @@ class SurroundProcessor  : public AudioProcessor,
 {
 public:
     SurroundProcessor()
-        : AudioProcessor(AudioIOProperties().withInput  ("Input",  AudioChannelSet::stereo())
-                                            .withOutput ("Output", AudioChannelSet::stereo()))
+        : AudioProcessor(BusesProperties().withInput  ("Input",  AudioChannelSet::stereo())
+                                          .withOutput ("Output", AudioChannelSet::stereo()))
     {}
 
     ~SurroundProcessor() {}
@@ -95,7 +95,7 @@ public:
     bool hasEditor() const override               { return true;   }
 
     //==============================================================================
-    bool isAudioBusesLayoutSupported (const AudioBusesLayout& layouts) const override
+    bool isBusesLayoutSupported (const BusesLayout& layouts) const override
     {
         return ((! layouts.getMainInputChannelSet() .isDiscreteLayout())
              && (! layouts.getMainOutputChannelSet().isDiscreteLayout())

@@ -295,7 +295,7 @@ static const unsigned char temp_binary_data_4[] =
 "//==============================================================================\r\n"
 "FILTERCLASSNAME::FILTERCLASSNAME()\r\n"
 "#ifndef JucePlugin_PreferredChannelConfigurations\r\n"
-"     : AudioProcessor (AudioIOProperties()\r\n"
+"     : AudioProcessor (BusesProperties()\r\n"
 "                     #if ! JucePlugin_IsMidiEffect\r\n"
 "                      #if ! JucePlugin_IsSynth\r\n"
 "                       .withInput  (\"Input\",  AudioChannelSet::stereo(), true)\r\n"
@@ -378,7 +378,7 @@ static const unsigned char temp_binary_data_4[] =
 "}\r\n"
 "\r\n"
 "#ifndef JucePlugin_PreferredChannelConfigurations\r\n"
-"bool FILTERCLASSNAME::isAudioBusesLayoutSupported (const AudioBusesLayout& layouts) const\r\n"
+"bool FILTERCLASSNAME::isBusesLayoutSupported (const BusesLayout& layouts) const\r\n"
 "{\r\n"
 "  #if JucePlugin_IsMidiEffect\r\n"
 "    ignoreUnused (layouts);\r\n"
@@ -492,7 +492,7 @@ static const unsigned char temp_binary_data_5[] =
 "    void releaseResources() override;\r\n"
 "\r\n"
 "   #ifndef JucePlugin_PreferredChannelConfigurations\r\n"
-"    bool isAudioBusesLayoutSupported (const AudioBusesLayout& layouts) const override;\r\n"
+"    bool isBusesLayoutSupported (const BusesLayout& layouts) const override;\r\n"
 "   #endif\r\n"
 "\r\n"
 "    void processBlock (AudioSampleBuffer&, MidiBuffer&) override;\r\n"
@@ -4059,8 +4059,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0xafccbd3f:  numBytes = 3203; return jucer_AudioComponentTemplate_cpp;
         case 0x27c5a93a:  numBytes = 1162; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 994; return jucer_AudioPluginEditorTemplate_h;
-        case 0x51b49ac5:  numBytes = 5487; return jucer_AudioPluginFilterTemplate_cpp;
-        case 0x488afa0a:  numBytes = 2269; return jucer_AudioPluginFilterTemplate_h;
+        case 0x51b49ac5:  numBytes = 5475; return jucer_AudioPluginFilterTemplate_cpp;
+        case 0x488afa0a:  numBytes = 2259; return jucer_AudioPluginFilterTemplate_h;
         case 0xabad7041:  numBytes = 2151; return jucer_ComponentTemplate_cpp;
         case 0xfc72fe86:  numBytes = 2131; return jucer_ComponentTemplate_h;
         case 0x0b66646c:  numBytes = 886; return jucer_ContentCompTemplate_cpp;

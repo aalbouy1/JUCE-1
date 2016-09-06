@@ -538,7 +538,7 @@ public:
         if (outError != nullptr)
             *outError = nullptr;
 
-        AudioProcessor::AudioBusesLayout layouts;
+        AudioProcessor::BusesLayout layouts;
         for (int dir = 0; dir < 2; ++dir)
         {
             const bool isInput = (dir == 0);
@@ -550,7 +550,7 @@ public:
 
             for (int busIdx = 0; busIdx < n; ++busIdx)
             {
-                AudioProcessor::AudioProcessorBus* bus = processor.getBus (isInput, busIdx);
+                AudioProcessor::Bus* bus = processor.getBus (isInput, busIdx);
                 AVAudioFormat* format = [[auBuses objectAtIndexedSubscript:static_cast<NSUInteger> (busIdx)] format];
 
                 AudioChannelSet newLayout;
@@ -578,7 +578,7 @@ public:
         }
        #endif
 
-        if (! processor.setAudioBusesLayout (layouts))
+        if (! processor.setBusesLayout (layouts))
         {
             if (outError != nullptr)
                 *outError = [NSError errorWithDomain:NSOSStatusErrorDomain code:kAudioUnitErr_FormatNotSupported userInfo:nullptr];
@@ -642,7 +642,7 @@ public:
 
         AudioProcessor& processor = getAudioProcessor();
 
-        if (AudioProcessor::AudioProcessorBus* bus = processor.getBus (isInput, busIdx))
+        if (AudioProcessor::Bus* bus = processor.getBus (isInput, busIdx))
         {
           #ifdef JucePlugin_PreferredChannelConfigurations
             ignoreUnused (bus);

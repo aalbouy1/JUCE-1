@@ -306,7 +306,7 @@ class AudioUnitPluginInstance     : public AudioPluginInstance
 {
 public:
     AudioUnitPluginInstance (AudioComponentInstance au)
-        : AudioPluginInstance (getAudioIOProperties (au)),
+        : AudioPluginInstance (getBusesProperties (au)),
           auComponent (AudioComponentInstanceGetComponent (au)),
           wantsMidiMessages (false),
           producesMidiMessages (false),
@@ -410,7 +410,7 @@ public:
     bool canAddBus (bool isInput)    const override                   { return isBusCountWritable (isInput); }
     bool canRemoveBus (bool isInput) const override                   { return isBusCountWritable (isInput); }
 
-    bool canApplyBusCountChange (bool isInput, bool isAdding, AudioBusProperties& outProperties) override
+    bool canApplyBusCountChange (bool isInput, bool isAdding, BusProperties& outProperties) override
     {
         int currentCount = getBusCount (isInput);
         int newCount = currentCount + (isAdding ? 1 : -1);
@@ -429,9 +429,9 @@ public:
     }
 
     //==============================================================================
-    bool isAudioBusesLayoutSupported (const AudioBusesLayout& layouts) const override
+    bool isBusesLayoutSupported (const BusesLayout& layouts) const override
     {
-        if (layouts == getAudioBusesLayout())
+        if (layouts == getBusesLayout())
             return true;
 
         for (int dir = 0; dir < 2; ++dir)
@@ -497,7 +497,7 @@ public:
         return true;
     }
 
-    bool syncBusLayouts (const AudioBusesLayout& layouts, bool isInitialized, bool& layoutHasChanged) const
+    bool syncBusLayouts (const BusesLayout& layouts, bool isInitialized, bool& layoutHasChanged) const
     {
         layoutHasChanged = false;
 
@@ -603,9 +603,9 @@ public:
         return true;
     }
 
-    bool canApplyBusesLayout (const AudioBusesLayout& layouts) const override
+    bool canApplyBusesLayout (const BusesLayout& layouts) const override
     {
-        // You cannot call setAudioBusesLayout when the AudioProcessor is processing.
+        // You cannot call setBusesLayout when the AudioProcessor is processing.
         // Call releaseResources first!
         jassert (! prepared);
 
@@ -627,7 +627,7 @@ public:
 
             if (! success)
                 // make sure that the layout is back to it's original state
-                syncBusLayouts (getAudioBusesLayout(), false, layoutHasChanged);
+                syncBusLayouts (getBusesLayout(), false, layoutHasChanged);
 
             return success;
         }
@@ -739,14 +739,14 @@ public:
 
             bool ignore;
 
-            if (! syncBusLayouts (getAudioBusesLayout(), false, ignore))
+            if (! syncBusLayouts (getBusesLayout(), false, ignore))
                 return;
 
             prepared = (AudioUnitInitialize (audioUnit) == noErr);
 
             if (prepared)
             {
-                if (! syncBusLayouts (getAudioBusesLayout(), true, ignore))
+                if (! syncBusLayouts (getBusesLayout(), true, ignore))
                 {
                     prepared = false;
                     AudioUnitUninitialize (audioUnit);
@@ -852,9 +852,9 @@ public:
     bool hasEditor() const override                  { return true; }
     AudioProcessorEditor* createEditor() override;
 
-    static AudioProcessor::AudioIOProperties getAudioIOProperties (AudioComponentInstance comp)
+    static AudioProcessor::BusesProperties getBusesProperties (AudioComponentInstance comp)
     {
-        AudioProcessor::AudioIOProperties busProperties;
+        AudioProcessor::BusesProperties busProperties;
 
         for (int dir = 0; dir < 2; ++dir)
         {

@@ -14,7 +14,7 @@ FILTERHEADERS
 //==============================================================================
 FILTERCLASSNAME::FILTERCLASSNAME()
 #ifndef JucePlugin_PreferredChannelConfigurations
-     : AudioProcessor (AudioIOProperties()
+     : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
                       #if ! JucePlugin_IsSynth
                        .withInput  ("Input",  AudioChannelSet::stereo(), true)
@@ -97,7 +97,7 @@ void FILTERCLASSNAME::releaseResources()
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
-bool FILTERCLASSNAME::isAudioBusesLayoutSupported (const AudioBusesLayout& layouts) const
+bool FILTERCLASSNAME::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
   #if JucePlugin_IsMidiEffect
     ignoreUnused (layouts);

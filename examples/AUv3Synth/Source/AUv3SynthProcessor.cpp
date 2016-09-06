@@ -12,7 +12,7 @@ class AUv3SynthProcessor : public AudioProcessor
 {
 public:
     AUv3SynthProcessor ()
-        : AudioProcessor (AudioIOProperties().withOutput ("Output", AudioChannelSet::stereo(), true)),
+        : AudioProcessor (BusesProperties().withOutput ("Output", AudioChannelSet::stereo(), true)),
           currentRecording (1, 1), currentProgram (0)
     {
         // initialize parameters
@@ -28,7 +28,7 @@ public:
     }
 
     //==============================================================================
-    bool isAudioBusesLayoutSupported (const AudioBusesLayout& layouts) const override
+    bool isBusesLayoutSupported (const BusesLayout& layouts) const override
     {
         return (layouts.getMainInputChannels() == 2);
     }

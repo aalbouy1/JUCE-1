@@ -1953,7 +1953,7 @@ public:
             warnOnFailure (holder->component->activateBus (Vst::kAudio, Vst::kOutput, i, getBus (false, i)->isEnabled() ? 1 : 0));
 
         setLatencySamples (jmax (0, (int) processor->getLatencySamples()));
-        cachedBusLayouts = getAudioBusesLayout();
+        cachedBusLayouts = getBusesLayout();
 
         warnOnFailure (holder->component->setActive (true));
         warnOnFailure (processor->setProcessing (true));
@@ -2036,7 +2036,7 @@ public:
     bool canAddBus (bool) const override                                       { return false; }
     bool canRemoveBus (bool) const override                                    { return false; }
 
-    bool isAudioBusesLayoutSupported (const AudioBusesLayout& layouts) const override
+    bool isBusesLayoutSupported (const BusesLayout& layouts) const override
     {
         // if the processor is not active, we ask the underlying plug-in if the
         // layout is actually supported
@@ -2057,7 +2057,7 @@ public:
         return true;
     }
 
-    bool syncBusLayouts (const AudioBusesLayout& layouts) const
+    bool syncBusLayouts (const BusesLayout& layouts) const
     {
         for (int dir = 0; dir < 2; ++dir)
         {
@@ -2098,7 +2098,7 @@ public:
         return (actualIn == inputArrangements && actualOut == outputArrangements);
     }
 
-    bool canApplyBusesLayout (const AudioBusesLayout& layouts) const override
+    bool canApplyBusesLayout (const BusesLayout& layouts) const override
     {
         // someone tried to change the layout while the AudioProcessor is running
         // call releaseResources first!
@@ -2108,7 +2108,7 @@ public:
 
         // didn't succeed? Make sure it's back in it's original state
         if (! result)
-            syncBusLayouts (getAudioBusesLayout());
+            syncBusLayouts (getBusesLayout());
 
         return result;
     }
@@ -2468,7 +2468,7 @@ private:
     */
     VST3FloatAndDoubleBusMapComposite inputBusMap, outputBusMap;
     Array<Vst::AudioBusBuffers> inputBuses, outputBuses;
-    AudioProcessor::AudioBusesLayout cachedBusLayouts;
+    AudioProcessor::BusesLayout cachedBusLayouts;
 
     StringArray programNames;
     Vst::ParamID programParameterID;
@@ -2573,13 +2573,13 @@ private:
 
         warnOnFailure (processor->setupProcessing (setup));
 
-        cachedBusLayouts = getAudioBusesLayout();
+        cachedBusLayouts = getBusesLayout();
         setRateAndBufferSizeDetails (setup.sampleRate, (int) setup.maxSamplesPerBlock);
     }
 
-    static AudioProcessor::AudioIOProperties getBusProperties (ComSmartPtr<Vst::IComponent>& component)
+    static AudioProcessor::BusesProperties getBusProperties (ComSmartPtr<Vst::IComponent>& component)
     {
-        AudioProcessor::AudioIOProperties busProperties;
+        AudioProcessor::BusesProperties busProperties;
         ComSmartPtr<Vst::IAudioProcessor> processor;
         processor.loadFrom (component.get());
 

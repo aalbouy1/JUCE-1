@@ -246,7 +246,7 @@ public:
                 int channel;
                 channel = processor.getOffsetInBusBufferForAbsoluteChannelIndex (isInput, index, busIdx);
 
-                if (const AudioProcessor::AudioProcessorBus* bus = processor.getBus (isInput, busIdx))
+                if (const AudioProcessor::Bus* bus = processor.getBus (isInput, busIdx))
                     tip = bus->getName() + String (": ")
                           + AudioChannelSet::getAbbreviatedChannelTypeName (bus->getCurrentLayout().getTypeOfChannel (channel));
                 else

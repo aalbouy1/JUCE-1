@@ -147,8 +147,8 @@ private:
 
 //==============================================================================
 JuceDemoPluginAudioProcessor::JuceDemoPluginAudioProcessor()
-    : AudioProcessor (AudioIOProperties().withInput  ("Input",  AudioChannelSet::stereo(), true)
-                                         .withOutput ("Output", AudioChannelSet::stereo(), true)),
+    : AudioProcessor (BusesProperties().withInput  ("Input",  AudioChannelSet::stereo(), true)
+                                       .withOutput ("Output", AudioChannelSet::stereo(), true)),
       lastUIWidth (400),
       lastUIHeight (200),
       gainParam (nullptr),
@@ -183,7 +183,7 @@ void JuceDemoPluginAudioProcessor::initialiseSynth()
 }
 
 //==============================================================================
-bool JuceDemoPluginAudioProcessor::isAudioBusesLayoutSupported (const AudioBusesLayout& layouts) const
+bool JuceDemoPluginAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
     // Only mono/stereo and input/output must have same layout
     const AudioChannelSet& mainInput  = layouts.getMainInputChannelSet();

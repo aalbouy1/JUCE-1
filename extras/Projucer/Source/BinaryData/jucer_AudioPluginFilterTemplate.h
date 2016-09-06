@@ -29,7 +29,7 @@ public:
     void releaseResources() override;
 
    #ifndef JucePlugin_PreferredChannelConfigurations
-    bool isAudioBusesLayoutSupported (const AudioBusesLayout& layouts) const override;
+    bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
    #endif
 
     void processBlock (AudioSampleBuffer&, MidiBuffer&) override;

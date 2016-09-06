@@ -760,7 +760,7 @@ public:
 
         if ((channelIdx = filter->getOffsetInBusBufferForAbsoluteChannelIndex (direction, index, busIdx)) >= 0)
         {
-            AudioProcessor::AudioProcessorBus& bus = *filter->getBus (direction, busIdx);
+            AudioProcessor::Bus& bus = *filter->getBus (direction, busIdx);
             const AudioChannelSet& channelSet = bus.getCurrentLayout();
             AudioChannelSet::ChannelType channelType = channelSet.getTypeOfChannel (channelIdx);
 
@@ -1762,7 +1762,7 @@ private:
                 return 0;
         }
 
-        AudioProcessor::AudioBusesLayout layouts = filter->getAudioBusesLayout();
+        AudioProcessor::BusesLayout layouts = filter->getBusesLayout();
 
         if (pluginInput  != nullptr && pluginInput-> numberOfChannels >= 0 && numIns  > 0)
             layouts.getChannelSet (true,  0) = SpeakerMappings::vstArrangementTypeToChannelSet (*pluginInput);
@@ -1776,7 +1776,7 @@ private:
             return 0;
        #endif
 
-        return filter->setAudioBusesLayout (layouts) ? 1 : 0;
+        return filter->setBusesLayout (layouts) ? 1 : 0;
     }
 
     pointer_sized_int handleSetBypass (VstOpCodeArguments args)

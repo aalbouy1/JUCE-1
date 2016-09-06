@@ -256,7 +256,7 @@ private:
     {
         if (AudioProcessor* filter = owner.getAudioProcessor())
         {
-            if (AudioProcessor::AudioProcessorBus* bus = filter->getBus (isInput, currentBus))
+            if (AudioProcessor::Bus* bus = filter->getBus (isInput, currentBus))
             {
                 int i;
 
@@ -297,7 +297,7 @@ private:
         {
             if (AudioProcessor* filter = owner.getAudioProcessor())
             {
-                if (AudioProcessor::AudioProcessorBus* bus = filter->getBus (isInput, currentBus))
+                if (AudioProcessor::Bus* bus = filter->getBus (isInput, currentBus))
                 {
                     const int selectedNumChannels = layouts.getSelectedId();
 
@@ -325,7 +325,7 @@ private:
         {
             if (AudioProcessor* filter = owner.getAudioProcessor())
             {
-                if (AudioProcessor::AudioProcessorBus* bus = filter->getBus (isInput, currentBus))
+                if (AudioProcessor::Bus* bus = filter->getBus (isInput, currentBus))
                 {
                     if (bus->isEnabled() != enabledToggle.getToggleState())
                     {
@@ -451,7 +451,7 @@ FilterIOConfigurationWindow::FilterIOConfigurationWindow (AudioProcessor* const 
     if (p->getBusCount (false) > 0 || p->canAddBus (false))
         addAndMakeVisible (outConfig = new InputOutputConfig (*this, false));
 
-    currentLayout = p->getAudioBusesLayout();
+    currentLayout = p->getBusesLayout();
     setSize (400, (inConfig != nullptr && outConfig != nullptr ? 160 : 0) + 200);
 }
 

@@ -668,7 +668,7 @@ public:
 
         return true;
        #else
-        if (const AudioProcessor::AudioProcessorBus* bus = juceFilter->getBus (isInput, busNr))
+        if (const AudioProcessor::Bus* bus = juceFilter->getBus (isInput, busNr))
         {
             AudioChannelSet discreteRangeSet;
             const int n = bus->getDefaultLayout().size();
@@ -1005,7 +1005,7 @@ public:
         if (newNumChannels == oldNumChannels)
             return true;
 
-        if (AudioProcessor::AudioProcessorBus* bus = juceFilter->getBus (isInput, busNr))
+        if (AudioProcessor::Bus* bus = juceFilter->getBus (isInput, busNr))
         {
             if (! MusicDeviceBase::ValidFormat (scope, element, format))
                 return false;
@@ -1742,7 +1742,7 @@ private:
         const int numInputElements  = static_cast<int> (GetScope(kAudioUnitScope_Input). GetNumberOfElements());
         const int numOutputElements = static_cast<int> (GetScope(kAudioUnitScope_Output).GetNumberOfElements());
 
-        AudioProcessor::AudioBusesLayout requestedLayouts;
+        AudioProcessor::BusesLayout requestedLayouts;
         for (int dir = 0; dir < 2; ++dir)
         {
             const bool isInput = (dir == 0);
@@ -1772,7 +1772,7 @@ private:
             return kAudioUnitErr_FormatNotSupported;
        #endif
 
-        if (! juceFilter->setAudioBusesLayout (requestedLayouts))
+        if (! juceFilter->setBusesLayout (requestedLayouts))
             return kAudioUnitErr_FormatNotSupported;
 
         // update total channel count
@@ -1844,7 +1844,7 @@ private:
         int layoutIndex;
         AudioChannelLayoutTag tag;
 
-        if (AudioProcessor::AudioProcessorBus* bus = juceFilter->getBus (isInput, busNum))
+        if (AudioProcessor::Bus* bus = juceFilter->getBus (isInput, busNum))
         {
            #ifndef JucePlugin_PreferredChannelConfigurations
             for (layoutIndex = 0; (tag = AudioUnitHelpers::auChannelStreamOrder[layoutIndex].auLayoutTag) != 0; ++layoutIndex)

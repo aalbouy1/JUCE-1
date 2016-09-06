@@ -34,7 +34,7 @@
     channel set. It is a collection of values from the AudioChannelSet::ChannelType
     enum, where each type may only occur once within the set.
 
-    @see AudioProcessorBus
+    @see Bus
 */
 class JUCE_API  AudioChannelSet
 {

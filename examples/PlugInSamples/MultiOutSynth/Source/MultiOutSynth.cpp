@@ -39,7 +39,7 @@ public:
 
     //==============================================================================
     MultiOutSynth()
-        : AudioProcessor (AudioIOProperties()
+        : AudioProcessor (BusesProperties()
                           .withOutput ("Output #1",  AudioChannelSet::stereo(), true)
                           .withOutput ("Output #2",  AudioChannelSet::stereo(), false)
                           .withOutput ("Output #3",  AudioChannelSet::stereo(), false)
@@ -49,13 +49,13 @@ public:
                           .withOutput ("Output #7",  AudioChannelSet::stereo(), false)
                           .withOutput ("Output #8",  AudioChannelSet::stereo(), false)
                           .withOutput ("Output #9",  AudioChannelSet::stereo(), false)
-                          .withOutput ("Output #10",  AudioChannelSet::stereo(), false)
-                          .withOutput ("Output #11",  AudioChannelSet::stereo(), false)
-                          .withOutput ("Output #12",  AudioChannelSet::stereo(), false)
-                          .withOutput ("Output #13",  AudioChannelSet::stereo(), false)
-                          .withOutput ("Output #14",  AudioChannelSet::stereo(), false)
-                          .withOutput ("Output #15",  AudioChannelSet::stereo(), false)
-                          .withOutput ("Output #16",  AudioChannelSet::stereo(), false))
+                          .withOutput ("Output #10", AudioChannelSet::stereo(), false)
+                          .withOutput ("Output #11", AudioChannelSet::stereo(), false)
+                          .withOutput ("Output #12", AudioChannelSet::stereo(), false)
+                          .withOutput ("Output #13", AudioChannelSet::stereo(), false)
+                          .withOutput ("Output #14", AudioChannelSet::stereo(), false)
+                          .withOutput ("Output #15", AudioChannelSet::stereo(), false)
+                          .withOutput ("Output #16", AudioChannelSet::stereo(), false))
     {
         // initialize other stuff (not related to buses)
         formatManager.registerBasicFormats();

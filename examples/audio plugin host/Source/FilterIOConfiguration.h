@@ -54,7 +54,7 @@ private:
     //==============================================================================
     friend class InputOutputConfig;
 
-    AudioProcessor::AudioBusesLayout currentLayout;
+    AudioProcessor::BusesLayout currentLayout;
     Label title;
     ScopedPointer<InputOutputConfig> inConfig, outConfig;
 

@@ -989,20 +989,20 @@ namespace AAXClasses
         // Returns false if the in/out main layout is not supported
         static bool fullBusesLayoutFromMainLayout (AudioProcessor& p,
                                                    const AudioChannelSet& mainInput, const AudioChannelSet& mainOutput,
-                                                   AudioProcessor::AudioBusesLayout& fullLayout)
+                                                   AudioProcessor::BusesLayout& fullLayout)
         {
-            bool success = p.setAudioBusesLayout (getDefaultLayout (p, true));
+            bool success = p.setBusesLayout (getDefaultLayout (p, true));
             jassert (success);
             ignoreUnused (success);
 
             const int numInputBuses  = p.getBusCount (true);
             const int numOutputBuses = p.getBusCount (false);
 
-            if (AudioProcessor::AudioProcessorBus* bus = p.getBus (true, 0))
+            if (AudioProcessor::Bus* bus = p.getBus (true, 0))
                 if (! bus->setCurrentLayout (mainInput))
                     return false;
 
-            if (AudioProcessor::AudioProcessorBus* bus = p.getBus (false, 0))
+            if (AudioProcessor::Bus* bus = p.getBus (false, 0))
                 if (! bus->setCurrentLayout (mainOutput))
                     return false;
 
@@ -1012,13 +1012,13 @@ namespace AAXClasses
 
            #ifdef JucePlugin_PreferredChannelConfigurations
             short configs[][2] = {JucePlugin_PreferredChannelConfigurations};
-            if (! AudioProcessor::containsLayout (p.getAudioBusesLayout(), configs))
+            if (! AudioProcessor::containsLayout (p.getBusesLayout(), configs))
                 return false;
            #endif
 
             bool foundValid = false;
             {
-                AudioProcessor::AudioBusesLayout onlyMains = p.getAudioBusesLayout();
+                AudioProcessor::BusesLayout onlyMains = p.getBusesLayout();
 
                 for (int i = 1; i < numInputBuses; ++i)
                     onlyMains.inputBuses.getReference  (i) = AudioChannelSet::disabled();
@@ -1026,7 +1026,7 @@ namespace AAXClasses
                 for (int i = 1; i < numOutputBuses; ++i)
                     onlyMains.outputBuses.getReference (i) = AudioChannelSet::disabled();
 
-                if (p.checkAudioBusesLayoutSupported (onlyMains))
+                if (p.checkBusesLayoutSupported (onlyMains))
                 {
                     foundValid = true;
                     fullLayout = onlyMains;
@@ -1036,21 +1036,21 @@ namespace AAXClasses
             if (numInputBuses > 1)
             {
                 // can the first bus be a sidechain or disabled, if not then we can't use this layout combination
-                if (AudioProcessor::AudioProcessorBus* bus = p.getBus (true, 1))
+                if (AudioProcessor::Bus* bus = p.getBus (true, 1))
                     if (! bus->setCurrentLayout (AudioChannelSet::mono()) && ! bus->setCurrentLayout (AudioChannelSet::disabled()))
                         return foundValid;
 
                 // can all the other inputs be disabled, if not then we can't use this layout combination
                 for (int i = 2; i < numInputBuses; ++i)
-                    if (AudioProcessor::AudioProcessorBus* bus = p.getBus (true, i))
+                    if (AudioProcessor::Bus* bus = p.getBus (true, i))
                         if (! bus->setCurrentLayout (AudioChannelSet::disabled()))
                             return foundValid;
 
-                if (AudioProcessor::AudioProcessorBus* bus = p.getBus (true, 0))
+                if (AudioProcessor::Bus* bus = p.getBus (true, 0))
                     if (! bus->setCurrentLayout (mainInput))
                         return foundValid;
 
-                if (AudioProcessor::AudioProcessorBus* bus = p.getBus (false, 0))
+                if (AudioProcessor::Bus* bus = p.getBus (false, 0))
                     if (! bus->setCurrentLayout (mainOutput))
                         return foundValid;
 
@@ -1072,12 +1072,12 @@ namespace AAXClasses
 
             if (hasSidechain)
             {
-                AudioProcessor::AudioBusesLayout onlyMainsAndSidechain = p.getAudioBusesLayout();
+                AudioProcessor::BusesLayout onlyMainsAndSidechain = p.getBusesLayout();
 
                 for (int i = 1; i < numOutputBuses; ++i)
                     onlyMainsAndSidechain.outputBuses.getReference (i) = AudioChannelSet::disabled();
 
-                if (p.checkAudioBusesLayoutSupported (onlyMainsAndSidechain))
+                if (p.checkBusesLayoutSupported (onlyMainsAndSidechain))
                 {
                     foundValid = true;
                     fullLayout = onlyMainsAndSidechain;
@@ -1086,7 +1086,7 @@ namespace AAXClasses
 
             if (numOutputBuses > 1)
             {
-                AudioProcessor::AudioBusesLayout copy = p.getAudioBusesLayout();
+                AudioProcessor::BusesLayout copy = p.getBusesLayout();
 
                 int maxAuxBuses = jmin (16, numOutputBuses);
                 for (int i = 1; i < maxAuxBuses; ++i)
@@ -1095,7 +1095,7 @@ namespace AAXClasses
                 for (int i = maxAuxBuses; i < numOutputBuses; ++i)
                     copy.outputBuses.getReference (i) = AudioChannelSet::disabled();
 
-                if (p.checkAudioBusesLayoutSupported (copy))
+                if (p.checkBusesLayoutSupported (copy))
                 {
                     fullLayout = copy;
                     foundValid = true;
@@ -1107,15 +1107,15 @@ namespace AAXClasses
                             return foundValid;
 
                     for (int i = maxAuxBuses; i < numOutputBuses; ++i)
-                        if (AudioProcessor::AudioProcessorBus* bus = p.getBus (false, i))
+                        if (AudioProcessor::Bus* bus = p.getBus (false, i))
                             if (! bus->setCurrentLayout (AudioChannelSet::disabled()))
                                 return foundValid;
 
-                    if (AudioProcessor::AudioProcessorBus* bus = p.getBus (true, 0))
+                    if (AudioProcessor::Bus* bus = p.getBus (true, 0))
                         if (! bus->setCurrentLayout (mainInput))
                             return foundValid;
 
-                    if (AudioProcessor::AudioProcessorBus* bus = p.getBus (false, 0))
+                    if (AudioProcessor::Bus* bus = p.getBus (false, 0))
                         if (! bus->setCurrentLayout (mainOutput))
                             return foundValid;
 
@@ -1134,7 +1134,7 @@ namespace AAXClasses
                         if (! p.getChannelLayoutOfBus (false, i).isDisabled())
                             return foundValid;
 
-                    fullLayout = p.getAudioBusesLayout();
+                    fullLayout = p.getBusesLayout();
                     foundValid = true;
                 }
             }
@@ -1328,7 +1328,7 @@ namespace AAXClasses
         AAX_Result preparePlugin()
         {
             AudioProcessor& audioProcessor = getPluginInstance();
-            AudioProcessor::AudioBusesLayout oldLayout = audioProcessor.getAudioBusesLayout();
+            AudioProcessor::BusesLayout oldLayout = audioProcessor.getBusesLayout();
 
             AudioChannelSet inputSet, outputSet;
             if (! getMainBusFormats (inputSet, outputSet))
@@ -1342,7 +1342,7 @@ namespace AAXClasses
                 return AAX_ERROR_UNIMPLEMENTED;
             }
 
-            AudioProcessor::AudioBusesLayout newLayout;
+            AudioProcessor::BusesLayout newLayout;
             if (! fullBusesLayoutFromMainLayout (audioProcessor, inputSet, outputSet, newLayout))
             {
                 if (isPrepared)
@@ -1358,7 +1358,7 @@ namespace AAXClasses
 
             if (layoutChanged)
             {
-                if (! audioProcessor.setAudioBusesLayout (newLayout))
+                if (! audioProcessor.setBusesLayout (newLayout))
                 {
                     if (isPrepared)
                     {
@@ -1460,9 +1460,9 @@ namespace AAXClasses
         }
 
         //==============================================================================
-        static AudioProcessor::AudioBusesLayout getDefaultLayout (AudioProcessor& p, bool enableAll)
+        static AudioProcessor::BusesLayout getDefaultLayout (AudioProcessor& p, bool enableAll)
         {
-            AudioProcessor::AudioBusesLayout defaultLayout;
+            AudioProcessor::BusesLayout defaultLayout;
 
             for (int dir = 0; dir < 2; ++dir)
             {
@@ -1471,24 +1471,24 @@ namespace AAXClasses
                 Array<AudioChannelSet>& layouts = (isInput ? defaultLayout.inputBuses : defaultLayout.outputBuses);
 
                 for (int i = 0; i < n; ++i)
-                    if (AudioProcessor::AudioProcessorBus* bus = p.getBus (isInput, i))
+                    if (AudioProcessor::Bus* bus = p.getBus (isInput, i))
                         layouts.add (enableAll || bus->isEnabledByDefault() ? bus->getDefaultLayout() : AudioChannelSet());
             }
 
             return defaultLayout;
         }
 
-        static AudioProcessor::AudioBusesLayout getDefaultLayout (AudioProcessor& p)
+        static AudioProcessor::BusesLayout getDefaultLayout (AudioProcessor& p)
         {
-            AudioProcessor::AudioBusesLayout defaultLayout;
+            AudioProcessor::BusesLayout defaultLayout;
 
             defaultLayout = getDefaultLayout (p, true);
 
-            if (! p.checkAudioBusesLayoutSupported (defaultLayout))
+            if (! p.checkBusesLayoutSupported (defaultLayout))
                 defaultLayout = getDefaultLayout (p, false);
 
             // Your processor must support the default layout
-            jassert (p.checkAudioBusesLayoutSupported (defaultLayout));
+            jassert (p.checkBusesLayoutSupported (defaultLayout));
             return defaultLayout;
         }
 
@@ -1577,7 +1577,7 @@ namespace AAXClasses
     };
 
     //==============================================================================
-    static void createDescriptor (AAX_IComponentDescriptor& desc, int configIndex, const AudioProcessor::AudioBusesLayout& fullLayout, AudioProcessor& processor)
+    static void createDescriptor (AAX_IComponentDescriptor& desc, int configIndex, const AudioProcessor::BusesLayout& fullLayout, AudioProcessor& processor)
     {
         AAX_EStemFormat aaxInputFormat  = getFormatForAudioChannelSet (fullLayout.getMainInputChannelSet(),  false);
         AAX_EStemFormat aaxOutputFormat = getFormatForAudioChannelSet (fullLayout.getMainOutputChannelSet(), false);
@@ -1704,7 +1704,7 @@ namespace AAXClasses
 
         if (AAX_IComponentDescriptor* const desc = descriptor.NewComponentDescriptor())
         {
-            createDescriptor (*desc, 0, plugin->getAudioBusesLayout(), *plugin);
+            createDescriptor (*desc, 0, plugin->getBusesLayout(), *plugin);
             check (descriptor.AddComponent (desc));
         }
 
@@ -1724,7 +1724,7 @@ namespace AAXClasses
                 AAX_EStemFormat aaxOutFormat = numOuts > 0 ? aaxFormats[outIdx] : AAX_eStemFormat_None;
                 AudioChannelSet outLayout = channelSetFromStemFormat (aaxOutFormat, false);
 
-                AudioProcessor::AudioBusesLayout fullLayout;
+                AudioProcessor::BusesLayout fullLayout;
                 if (! JuceAAX_Processor::fullBusesLayoutFromMainLayout (*plugin, inLayout, outLayout, fullLayout))
                     continue;
 

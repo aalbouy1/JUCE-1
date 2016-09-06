@@ -34,7 +34,7 @@ public:
 
     //==============================================================================
     Arpeggiator()
-        : AudioProcessor (AudioIOProperties()) // add no audio buses at all
+        : AudioProcessor (BusesProperties()) // add no audio buses at all
     {
         addParameter (speed = new AudioParameterFloat ("speed", "Arpeggiator Speed", 0.0, 1.0, 0.5));
     }

@@ -34,8 +34,8 @@ public:
 
     //==============================================================================
     GainProcessor()
-        : AudioProcessor (AudioProcessor::AudioIOProperties().withInput  ("Input",  AudioChannelSet::stereo())
-                                                             .withOutput ("Output", AudioChannelSet::stereo()))
+        : AudioProcessor (BusesProperties().withInput  ("Input",  AudioChannelSet::stereo())
+                                           .withOutput ("Output", AudioChannelSet::stereo()))
     {
         addParameter (gain = new AudioParameterFloat ("gain", "Gain", 0.0f, 1.0f, 0.5f));
     }
@@ -80,7 +80,7 @@ public:
     }
 
     //==============================================================================
-    bool isAudioBusesLayoutSupported (const AudioBusesLayout& layouts) const override
+    bool isBusesLayoutSupported (const BusesLayout& layouts) const override
     {
         const AudioChannelSet& mainInLayout  = layouts.getChannelSet (true,  0);
         const AudioChannelSet& mainOutLayout = layouts.getChannelSet (false, 0);

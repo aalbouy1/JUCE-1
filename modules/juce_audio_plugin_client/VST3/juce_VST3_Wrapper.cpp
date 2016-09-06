@@ -1558,7 +1558,7 @@ public:
     {
         if (type == Vst::kAudio)
         {
-            if (const AudioProcessor::AudioProcessorBus* bus = pluginInstance->getBus (dir == Vst::kInput, index))
+            if (const AudioProcessor::Bus* bus = pluginInstance->getBus (dir == Vst::kInput, index))
             {
                 info.mediaType = Vst::kAudio;
                 info.direction = dir;
@@ -1630,7 +1630,7 @@ public:
             if (state == 0 && index == 0)
                 return kResultFalse;
 
-            if (AudioProcessor::AudioProcessorBus* bus = pluginInstance->getBus (dir == Vst::kInput, index))
+            if (AudioProcessor::Bus* bus = pluginInstance->getBus (dir == Vst::kInput, index))
                 return (bus->enable (state != 0) ? kResultTrue : kResultFalse);
         }
 
@@ -1662,7 +1662,7 @@ public:
         if (numIns > numInputBuses || numOuts > numOutputBuses)
             return false;
 
-        AudioProcessor::AudioBusesLayout requested = pluginInstance->getAudioBusesLayout();
+        AudioProcessor::BusesLayout requested = pluginInstance->getBusesLayout();
 
         for (int i = 0; i < numIns; ++i)
             requested.getChannelSet (true,  i) = getChannelSetForSpeakerArrangement (inputs[i]);
@@ -1676,12 +1676,12 @@ public:
             return kResultFalse;
        #endif
 
-        return (pluginInstance->setAudioBusesLayoutWithoutEnabling (requested) ? kResultTrue : kResultFalse);
+        return (pluginInstance->setBusesLayoutWithoutEnabling (requested) ? kResultTrue : kResultFalse);
     }
 
     tresult PLUGIN_API getBusArrangement (Vst::BusDirection dir, Steinberg::int32 index, Vst::SpeakerArrangement& arr) override
     {
-        if (AudioProcessor::AudioProcessorBus* bus = pluginInstance->getBus (dir == Vst::kInput, index))
+        if (AudioProcessor::Bus* bus = pluginInstance->getBus (dir == Vst::kInput, index))
         {
             arr = getVst3SpeakerArrangement (bus->getLastEnabledLayout());
             return kResultTrue;
