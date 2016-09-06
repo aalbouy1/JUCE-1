@@ -2188,9 +2188,6 @@
     <ClCompile Include="..\..\JuceLibraryCode\juce_audio_plugin_client_VST2.cpp">
       <Filter>Juce Library Code</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_audio_plugin_client_VST3.cpp">
-      <Filter>Juce Library Code</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\juce_audio_processors.cpp">
       <Filter>Juce Library Code</Filter>
     </ClCompile>
