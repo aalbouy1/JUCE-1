@@ -1282,13 +1282,18 @@ namespace AAXClasses
         bool getMainBusFormats (AudioChannelSet& inputSet, AudioChannelSet& outputSet)
         {
             AudioProcessor& audioProcessor = getPluginInstance();
+           #if ! JucePlugin_IsMidiEffect
             const int inputBuses  = audioProcessor.getBusCount (true);
             const int outputBuses = audioProcessor.getBusCount (false);
+           #endif
 
            #if JucePlugin_IsMidiEffect
             // MIDI effect plug-ins do not support any audio channels
-            jassert (audioProcessor.busArrangement.getTotalNumInputChannels()  == 0
-                     && audioProcessor.busArrangement.getTotalNumOutputChannels() == 0);
+            jassert (audioProcessor.getTotalNumInputChannels()  == 0
+                  && audioProcessor.getTotalNumOutputChannels() == 0);
+
+            inputSet = outputSet = AudioChannelSet();
+
             return true;
            #else
             AAX_EStemFormat inputStemFormat = AAX_eStemFormat_None;
@@ -1574,7 +1579,11 @@ namespace AAXClasses
        #if JucePlugin_IsSynth
         if (aaxInputFormat == AAX_eStemFormat_None)
             aaxInputFormat = aaxOutputFormat;
-      #endif
+       #endif
+
+       #if JucePlugin_IsMidiEffect
+        aaxInputFormat = aaxOutputFormat = AAX_eStemFormat_Mono;
+       #endif
 
         check (desc.AddAudioIn  (JUCEAlgorithmIDs::inputChannels));
         check (desc.AddAudioOut (JUCEAlgorithmIDs::outputChannels));
@@ -1689,7 +1698,7 @@ namespace AAXClasses
 
         if (AAX_IComponentDescriptor* const desc = descriptor.NewComponentDescriptor())
         {
-            createDescriptor (*desc, *plugin, 0, AAX_eStemFormat_Mono, AAX_eStemFormat_Mono, false, 0);
+            createDescriptor (*desc, 0, plugin->getAudioBusesLayout(), *plugin);
             check (descriptor.AddComponent (desc));
         }
 
