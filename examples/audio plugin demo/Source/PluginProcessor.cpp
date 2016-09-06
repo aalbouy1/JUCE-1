@@ -147,7 +147,9 @@ private:
 
 //==============================================================================
 JuceDemoPluginAudioProcessor::JuceDemoPluginAudioProcessor()
-    : lastUIWidth (400),
+    : AudioProcessor (AudioIOProperties().withInput  ("Input",  AudioChannelSet::stereo(), true)
+                                         .withOutput ("Output", AudioChannelSet::stereo(), true)),
+      lastUIWidth (400),
       lastUIHeight (200),
       gainParam (nullptr),
       delayParam (nullptr),
@@ -181,6 +183,14 @@ void JuceDemoPluginAudioProcessor::initialiseSynth()
 }
 
 //==============================================================================
+bool JuceDemoPluginAudioProcessor::isAudioBusesLayoutSupported (const AudioBusesLayout& layouts) const
+{
+    // Only mono/stereo and input/output must have same layout
+    return ((layouts.getMainInputChannelSet()  == AudioChannelSet::mono() ||
+             layouts.getMainInputChannelSet()  == AudioChannelSet::stereo()) &&
+            (layouts.getMainOutputChannelSet() == layouts.getMainInputChannelSet()));
+}
+
 void JuceDemoPluginAudioProcessor::prepareToPlay (double newSampleRate, int /*samplesPerBlock*/)
 {
     // Use this method as the place to do any pre-playback

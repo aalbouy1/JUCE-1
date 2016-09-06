@@ -26,6 +26,7 @@ public:
     ~JuceDemoPluginAudioProcessor();
 
     //==============================================================================
+    bool isAudioBusesLayoutSupported (const AudioBusesLayout& layouts) const override;
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
     void reset() override;
