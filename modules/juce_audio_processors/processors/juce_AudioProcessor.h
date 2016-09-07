@@ -69,13 +69,13 @@ protected:
    #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
     AudioProcessor (const std::initializer_list<const short[2]>& channelLayoutList)
     {
-        initialise (busIOFromLayoutArray (layoutListToArray (channelLayoutList)));
+        initialise (busesPropertiesFromLayoutArray (layoutListToArray (channelLayoutList)));
     }
    #else
     template <int numLayouts>
     AudioProcessor (const short channelLayoutList[numLayouts][2])
     {
-        initialise (busIOFromLayoutArray (layoutListToArray (channelLayoutList)));
+        initialise (busesPropertiesFromLayoutArray (layoutListToArray (channelLayoutList)));
     }
    #endif
 
@@ -1496,7 +1496,7 @@ private:
    #endif
 
     //==============================================================================
-    static BusesProperties busIOFromLayoutArray (const Array<InOutChannelPair>&);
+    static BusesProperties busesPropertiesFromLayoutArray (const Array<InOutChannelPair>&);
 
     //==============================================================================
     BusesLayout getNextBestLayoutInList (const BusesLayout& layouts,

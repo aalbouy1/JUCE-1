@@ -741,7 +741,7 @@ void AudioProcessor::createBus (bool inputBus, const BusProperties& ioConfig)
 }
 
 //==============================================================================
-AudioProcessor::BusesProperties AudioProcessor::busIOFromLayoutArray (const Array<InOutChannelPair>& config)
+AudioProcessor::BusesProperties AudioProcessor::busesPropertiesFromLayoutArray (const Array<InOutChannelPair>& config)
 {
     BusesProperties ioProps;
 
